@@ -32,10 +32,8 @@ import java.awt.geom.Area;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.util.Vector;
-
-import cma.PrintfFormat;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -141,13 +139,13 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * Intern buffer for making friction calculations faster.
      */
     public FrictionBuffer frictionBuffer;// = new FrictionBuffer(this);
-    private static Map<String,FrictionBuffer> frictionBufferCache =
+    private static Map<String, FrictionBuffer> frictionBufferCache =
             new ConcurrentHashMap<String, FrictionBuffer>();
 //            new HashMap<String, FrictionBuffer>();
 
     public boolean capture = false;
     private boolean isEnclosedWithWalls = false;
-    private final boolean DEBUG_FRICTION_CACHE = true;
+    private final boolean DEBUG_FRICTION_CACHE = false;
     private String svgFileName = "";
 
     /**
@@ -183,12 +181,12 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         if (get == null) { //if not in cache, create new instance and
             frictionBuffer = new FrictionBuffer(this);
             frictionBufferCache.put(this.svgFileName, frictionBuffer);
-            if(DEBUG_FRICTION_CACHE) {
+            if (DEBUG_FRICTION_CACHE) {
                 System.out.println("Cached friction buffer not found, I have created new instance and cached it.");
             }
         } else {
             frictionBuffer = get;
-            if(DEBUG_FRICTION_CACHE) {
+            if (DEBUG_FRICTION_CACHE) {
                 System.out.println("Cached friction buffer found.");
             }
         }
@@ -240,7 +238,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         Vector<HashMap<String, Vector<Shape>>> shapeMap = loader.getShapesWithTypeMap();
         int l = 1;
         for (HashMap<String, Vector<Shape>> m : shapeMap) {
-            if (m == null);//System.out.println("No shapes loaded on layer " + l);
+            if (m == null) ;//System.out.println("No shapes loaded on layer " + l);
             else {
                 Vector<ArenaPart> v = ArenaPartsGenerator.createParts(m, l, this);
                 for (ArenaPart vivae : v) {
@@ -321,14 +319,21 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     }
 
     /**
-     * Starts up the simulation.
+     * Initializes the simulation.
      */
-    public void start() {
+    public void init() {
         if (isVisible) {
             this.setScreenSize(screenWidth, screenHeight);
         }
         initWorld();
         setRunning(true);
+    }
+
+    /**
+     * Starts up the simulation.
+     */
+    public void start() {
+        init();
         this.run();
     }
 
@@ -493,7 +498,6 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     /**
      * Defines reactions on pressed keys for the arena.
      */
-    @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_A:
@@ -527,11 +531,9 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         }
     }
 
-    @Override
     public void keyReleased(KeyEvent e) {
     }
 
-    @Override
     public void keyTyped(KeyEvent arg0) {
     }
 
@@ -543,31 +545,9 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * if the visible output is turned on, the painting method is called
      * and the thread sleeps for a several (according to loopSleepTime property) milisecs.
      */
-    @Override
     public void run() {
         while (isRunning) {
-            for (int i = 0; i < worldStepsPerLoop; i++) {
-                world.step();
-                if (capture) {
-                    if (stepsDone % 5 == 0) {
-                        String s = new PrintfFormat("%06d").sprintf(stepsDone);
-                        this.captureToSVG("step" + s + ".svg");
-                    }
-                }
-                stepsDone++;
-            }
-            if (stepsDone > totalStepsPerSimulation) {
-                isRunning = false;
-            }
-            for (Active active : getActives()) {
-                active.setDamping(
-                        (float) frictionBuffer.getFriction((int) active.getX(), (int) active.getY()));
-            }
-            for (Passive passive : getPassives()) {
-                passive.setDamping(
-                        (float) frictionBuffer.getFriction((int) passive.getX(), (int) passive.getY()));
-            }
-            moveVivaes();
+            step();
 
             //Kod k animaci..
             //TODO: oddelit prezentaci od simulacni logiky.
@@ -581,8 +561,43 @@ public class Arena extends JPanel implements KeyListener, Runnable {
                     }
                 }
             }
+
+            if (stepsDone > totalStepsPerSimulation) {
+                isRunning = false;
+            }
         }
     }
+
+    public void step() {
+        for (int i = 0; i < worldStepsPerLoop; i++) {
+            world.step();
+//                if (stepsDone % 100 == 0) {
+//                    System.out.println("println = "+stepsDone);
+
+//                }
+            if (capture) {
+                if (stepsDone % 5 == 0) {
+                    String s = String.format("%06d", stepsDone);
+                    this.captureToSVG("step" + s + ".svg");
+                }
+            }
+            stepsDone++;
+        }
+
+        for (Active active : getActives()) {
+            active.setDamping(getFrictionOfSurface(active));  //speedup
+//            active.setDamping((float) frictionBuffer.getFriction((int) active.getX(), (int) active.getY()));
+        }
+        for (Passive passive : getPassives()) {
+            passive.setDamping(getFrictionOfSurface(passive));  //speedup
+//            passive.setDamping((float) frictionBuffer.getFriction((int) passive.getX(), (int) passive.getY()));
+
+        }
+        moveVivaes();
+
+        repaint();
+    }
+
 
     /**
      * Initializes structures necessary for the SVG output
@@ -688,6 +703,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * Method that surrounds whole Arena with 4 rectangles, one for each side of Arena,
      * that blocks objects in Arena from falling out of it. The walls are placed outside
      * the Arena so that they won't reduce the space in Arena with their bodies.
+     *
      * @param thickness Width of the walls.
      */
     private void encloseWithWalls(int thickness) {

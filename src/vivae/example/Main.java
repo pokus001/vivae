@@ -18,7 +18,7 @@ public class Main {
     public static void main(String[] args) {
         JFrame f = new JFrame("Arena");
         Arena arena = new Arena(f);
-        arena.loadScenario("data/scenarios/ushape2.svg");
+        arena.loadScenario("cfg/vivae/scenarios/ushape2.svg");
         Vector<Active> agents = arena.getActives();
 
         for (Active agent : agents) {

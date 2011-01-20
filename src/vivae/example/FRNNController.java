@@ -4,7 +4,7 @@ import vivae.controllers.RobotWithSensorController;
 import vivae.util.Util;
 
 
-import nn.FRNN;
+import vivae.controllers.nn.FRNN;
 
 /**
  * Created by IntelliJ IDEA.

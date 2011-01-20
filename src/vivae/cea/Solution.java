@@ -1,6 +1,6 @@
 package vivae.cea;
 
-import nn.FRNN;
+import vivae.controllers.nn.FRNN;
 
 /**
  * Class representing the solution of the problem. It holds all the necessary information.
@@ -9,6 +9,7 @@ import nn.FRNN;
  */
 public class Solution {
     public FRNN network;
+
     Solution(FRNN network) {
         this.network = network;
     }

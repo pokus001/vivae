@@ -10,7 +10,7 @@ package vivae.example;
 
 import java.util.Vector;
 import javax.swing.JFrame;
-import nn.FRNN;
+import vivae.controllers.nn.FRNN;
 import vivae.arena.parts.Active;
 import vivae.arena.Arena;
 import vivae.util.Util;
@@ -127,7 +127,7 @@ public class FRNNExperiment {
     public static void main(String[] args) {
 
         FRNNExperiment exp = new FRNNExperiment();
-        exp.createArena("data/scenarios/arena1.svg",true);
+        exp.createArena("cfg/vivae/scenarios/arena1.svg",true);
         // random weight matrices as 3D array
         // 3 robots,
         int sensors=5; // 5 for distance and 5 for surface

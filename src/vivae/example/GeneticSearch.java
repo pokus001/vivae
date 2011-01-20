@@ -42,7 +42,7 @@ public class GeneticSearch {
     }
 
     public static void main(String[] args) {
-        final String scenario = "data/scenarios/arena2.svg";
+        final String scenario = "cfg/vivae/scenarios/arena2.svg";
         final double mutationRate = 0.01;
         final double crossoverRate = 0.7;
         final int generationCount = 25;
@@ -252,7 +252,6 @@ public class GeneticSearch {
             return parent;
         }
 
-        @Override
         public int compareTo(WeightedNetwork other) {
             return Double.compare(other.fitness, fitness);
         }

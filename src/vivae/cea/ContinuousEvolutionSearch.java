@@ -1,36 +1,36 @@
 package vivae.cea;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import nn.FRNN;
 import org.uncommons.maths.random.SeedException;
 import vivae.cea.main.ContinuousSearchMain.Options;
+import vivae.controllers.nn.FRNN;
 import vivae.example.FRNNExperiment;
 import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
 import vivae.util.Util;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static vivae.cea.MathUtil.clip;
 
 /**
  * From the paper CONTINUAL EVOLUTION ALGORITHM FOR BUILDING OF ANN-BASED MODELS,
  * authors: Zdenek Buk, Miroslav Snorek.
- * 
- *      Algorithm1 (The General CE Algorithm):
- *      1.Initialization
- *      2.Repeat until stop condition
- *          2.1.Evaluate all individuals
- *          2.2.Reproduction of the individuals with respect to the RP(¯xi) value
- *          2.3.Elimination of the individuals with respect to the DP(¯xi) value
- *          2.4.Adaptation of the parametrical vector of each individual
- *          2.5.Update all working parameters and age parameter of individuals
- *      3.The result processing
+ * <p/>
+ * Algorithm1 (The General CE Algorithm):
+ * 1.Initialization
+ * 2.Repeat until stop condition
+ * 2.1.Evaluate all individuals
+ * 2.2.Reproduction of the individuals with respect to the RP(¯xi) value
+ * 2.3.Elimination of the individuals with respect to the DP(¯xi) value
+ * 2.4.Adaptation of the parametrical vector of each individual
+ * 2.5.Update all working parameters and age parameter of individuals
+ * 3.The result processing
  *
  * @author Bc. Ramunas Belkauskas
  */
@@ -45,7 +45,6 @@ public class ContinuousEvolutionSearch {
     }
 
     /**
-     *
      * @return
      */
     public Solution runSearch() throws InterruptedException, ExecutionException {
@@ -73,7 +72,6 @@ public class ContinuousEvolutionSearch {
         final Function2Params<Double, Double, Double> rawDPFunction =
                 new Function2Params<Double, Double, Double>() {
 
-                    @Override
                     public Double apply(Double arg1, Double arg2) {
                         double fitness = clip(arg1, 0.0, 1.0); //must be between 0 and 1
                         double age = clip(arg2, 0.0, 1.0);//relative to maxAge
@@ -91,7 +89,6 @@ public class ContinuousEvolutionSearch {
         final Function2Params<Double, Double, Double> rawRPFunction =
                 new Function2Params<Double, Double, Double>() {
 
-                    @Override
                     public Double apply(Double arg1, Double arg2) {
                         double fitness = clip(arg1, 0.0, 1.0);
                         double age = clip(arg2, 0.0, 1.0);
@@ -112,7 +109,6 @@ public class ContinuousEvolutionSearch {
                      * Balance death probability to population size.
                      * Bigger population -> bigger chance of death.
                      */
-                    @Override
                     public Double apply(final Double arg1, final Double arg2) {
                         double deathProb = clip(arg1, 0.0, 1.0);
                         double ratio = clip(arg2, 0.0, 1.0);
@@ -130,7 +126,6 @@ public class ContinuousEvolutionSearch {
                      * Balance reproduction probability to population size.
                      * Bigger population -> smaller chance of reproduction (low resources).
                      */
-                    @Override
                     public Double apply(final Double arg1, final Double arg2) {
                         double reprProb = clip(arg1, 0.0, 1.0);
                         double ratio = clip(arg2, 0.0, 1.0);
@@ -259,6 +254,7 @@ public class ContinuousEvolutionSearch {
 
     /**
      * Utility method which copies only live individuals.
+     *
      * @param population
      * @return Shallow copy of population containing only live individuals.
      */
@@ -274,12 +270,12 @@ public class ContinuousEvolutionSearch {
 
     /**
      * Generates random population of given size.
-     * 
+     *
      * @param populationSize
      * @return
      */
     private static ArrayList<Individual> createRandomPopulation(final int populationSize,
-            final int neurons, final int sensors) {
+                                                                final int neurons, final int sensors) {
         ArrayList<Individual> population = new ArrayList<Individual>(populationSize);
 
         for (int i = 0; i < populationSize; i++) {
@@ -298,7 +294,7 @@ public class ContinuousEvolutionSearch {
 
 /**
  * Evaluator class runs experiment and evaluates fitness of individuals.
- * 
+ *
  * @author Bc. Ramunas Belkauskas (ramunas.belkauskas@gmail.com)
  */
 class IndividualEvaluator {

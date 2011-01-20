@@ -1,10 +1,10 @@
-
 package vivae.cea;
+
+import vivae.controllers.nn.FRNN;
+import vivae.util.Util;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import nn.FRNN;
-import vivae.util.Util;
 
 
 /**
@@ -16,9 +16,13 @@ class Individual {
 
     protected static final double MAX_WEIGTH = 1.;
     protected static final double MIN_WEIGTH = -1.;
-    /** count of neurons */
+    /**
+     * count of neurons
+     */
     private int neurons;
-    /** count of sensors */
+    /**
+     * count of sensors
+     */
     private int sensors;
     /**
      * Age of individual - a.
@@ -44,21 +48,22 @@ class Individual {
      * Convenience factory method which takes 2d input arrays and creates individual,
      * which internally uses 1D arrays.
      *
-     * @param neurons Number of neurons
-     * @param sensors Number of sensors
-     * @param param 2d array describing eaights and thresholds in net.
-     *              Must be of size <code>neurons x (neurons + sensors + 1)</code>
+     * @param neurons   Number of neurons
+     * @param sensors   Number of sensors
+     * @param param     2d array describing eaights and thresholds in net.
+     *                  Must be of size <code>neurons x (neurons + sensors + 1)</code>
      * @param structure 2d array describing which connections in neural net are active.
-     *              Must be of size <code>neurons x (neurons + sensors)</code>
+     *                  Must be of size <code>neurons x (neurons + sensors)</code>
      * @return
      */
     public static Individual createIndividual(final int neurons, final int sensors,
-            final double[][] param, final boolean[][] structure) {
+                                              final double[][] param, final boolean[][] structure) {
         double[] paramFlat = Util.flatten(param);
         boolean[] structFlat = Util.flatten(structure);
         Individual instance = new Individual(neurons, sensors, paramFlat, structFlat);
         return instance;
     }
+
     double fitness;
     double deathProb;
     double reproProb;
@@ -67,25 +72,25 @@ class Individual {
     /**
      * Ctor for the individual.
      *
-     * @param neurons Numbers of neurons in the neural net for this individual.
-     * @param sensors Numbers of sensors in the neural net for this individual.
-     * @param param Parametric vector of individual - initial weights.
+     * @param neurons   Numbers of neurons in the neural net for this individual.
+     * @param sensors   Numbers of sensors in the neural net for this individual.
+     * @param param     Parametric vector of individual - initial weights.
      * @param structure Structural vector - enabled and disabled edges in graph.
      */
     public Individual(final int neurons, final int sensors,
-            final double[] param, final boolean[] structure) {
+                      final double[] param, final boolean[] structure) {
         int requiredLength = getRequired1DLength(neurons, sensors);
         if (requiredLength != param.length) {
             throw new IllegalArgumentException(
                     String.format(
-                    "Illegal parametric array length (%d). Must be of neurons*(neurons+sensors+1) = %d%n",
-                    param.length, requiredLength));
+                            "Illegal parametric array length (%d). Must be of neurons*(neurons+sensors+1) = %d%n",
+                            param.length, requiredLength));
         }
         int structReqLen = neurons * (neurons + sensors);
         if (structReqLen != structure.length) {
             throw new IllegalArgumentException(
                     "Illegel structure array length. Must be of neurons*(neurons+sensors) = "
-                    + structReqLen);
+                            + structReqLen);
         }
         this.neurons = neurons;
         this.sensors = sensors;
@@ -96,6 +101,7 @@ class Individual {
 
     /**
      * Transforms individual information to FRNN.
+     *
      * @return
      */
     public FRNN getNetwork() {
@@ -152,7 +158,7 @@ class Individual {
      * Returns whether are two given neurons connected.
      *
      * @param fromNeuron Start of the connection to test.
-     * @param toNeuron End of connection to test.
+     * @param toNeuron   End of connection to test.
      * @return True if there is a connection from the first neuron to the second.
      */
     public boolean isNeuronsConnected(int fromNeuron, int toNeuron) {
@@ -199,9 +205,9 @@ class Individual {
     public int getSensorsCount() {
         return sensors;
     }
+
     public static final Comparator<Individual> byFitnessDescComparator = new Comparator<Individual>() {
 
-        @Override
         public int compare(Individual o1, Individual o2) {
             //descending sort..
             return Double.compare(o2.fitness, o1.fitness);

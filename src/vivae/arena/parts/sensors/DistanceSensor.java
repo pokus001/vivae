@@ -13,7 +13,6 @@ import net.phys2d.raw.shapes.Box;
 import vivae.arena.parts.Active;
 import vivae.arena.parts.VivaeObject;
 import vivae.arena.parts.Fixed;
-import vivae.arena.parts.Puck;
 import vivae.util.PathIntersection;
 
 /**

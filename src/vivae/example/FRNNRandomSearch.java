@@ -49,7 +49,7 @@ public class FRNNRandomSearch {
     }
 
     public static void main(String[] arg) {
-        String scenario = "data/scenarios/arena1.svg";
+        String scenario = "cfg/vivae/scenarios/arena1.svg";
         FRNNRandomSearch s = new FRNNRandomSearch();
         int neurons = 3;
         int sensors = 3;
