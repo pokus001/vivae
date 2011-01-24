@@ -188,6 +188,32 @@ public class Main {
         experiment.startExperiment();
     }
 
+    public static void runJoystickSWDemo() {
+        FileWriterRobot robot1 = new FileWriterRobot("robot_commands.txt");
+        JoystickController controller1 = new JoystickController(robot1);
+
+        VivaeRobot robot2 = new VivaeRobot(null);
+        JoystickController controller2 = new JoystickController(robot2);
+        VivaeControllerAdapter vivaeControllerAdapter = new VivaeControllerAdapter(controller2);
+
+        IRobotController controller = new MultipleController(new IRobotController[]{controller1, controller2});
+
+        BuildExperiment experiment = new BuildExperiment(vivaeControllerAdapter);
+        experiment.createArena("cfg/vivae/scenarios/arena3.svg", true);
+        experiment.setupExperiment();
+//            experiment.stepExperiment();
+
+        for (int i = 0; i < 10000; i++) {
+            controller.step();
+            experiment.stepExperiment();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void runFileWriterDemo() {
         IRobotInterface robot = new FileWriterRobot(System.out);
         IRobotController controller = new DemoController(robot);
@@ -197,7 +223,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        runVivaeDemo();
+//        runVivaeDemo();
 //        runJoystickHWDemo();
 //        runFileReaderHWDemo();
 //        runMultipleDemo();
@@ -205,5 +231,6 @@ public class Main {
 //        runHWUserUIDemo();
 //        runVivaeUserUI();
 //        runFileWriterDemo();
+        runJoystickSWDemo();
     }
 }
