@@ -1,9 +1,8 @@
 package vivae.example;
 
-import vivae.util.Util;
-import vivae.fitness.FitnessFunction;
-import vivae.fitness.MovablesOnTop;
 import vivae.fitness.AverageSpeed;
+import vivae.fitness.FitnessFunction;
+import vivae.util.Util;
 
 /**
  * Created by IntelliJ IDEA.
@@ -53,10 +52,10 @@ public class FRNNRandomSearch {
         FRNNRandomSearch s = new FRNNRandomSearch();
         int neurons = 3;
         int sensors = 3;
-        int evaluations = 100;
+        int evaluations = 10;
 //        int evaluations = 3;
         double[][] wmbest = s.search(scenario, sensors, neurons, evaluations);
-        System.out.println(Util.toString2Darray(wmbest, ","));
-//        s.play(scenario, wmbest); // play the best one
+//        System.out.println(Util.toString2Darray(wmbest, ","));
+        s.play(scenario, wmbest); // play the best one
     }
 }
