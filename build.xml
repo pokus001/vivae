@@ -5,7 +5,7 @@
     <property name="CLASSES_DIR" value="${BUILD_DIR}/classes"/>
     <property name="SRC_DIR" value="src"/>
     <property name="LIB_DIR" value="lib"/>
-    <property name="DATA_DIR" value="data"/>
+    <property name="DATA_DIR" value="cfg"/>
 
     <target name="clean">
         <delete includeemptydirs="true">
@@ -15,10 +15,10 @@
 
     <target name="make_dirs">
         <mkdir dir="${CLASSES_DIR}"/>
-        <copy todir="${BUILD_DIR}/${DATA_DIR}"> 
+        <copy todir="${BUILD_DIR}/${DATA_DIR}">
             <fileset dir="${DATA_DIR}"/>
         </copy>
-        <copy todir="${BUILD_DIR}/${LIB_DIR}"> 
+        <copy todir="${BUILD_DIR}/${LIB_DIR}">
             <fileset dir="${LIB_DIR}"/>
         </copy>
     </target>
@@ -34,6 +34,11 @@
         <!--copy todir="${CLASSES_DIR}">
             <fileset dir="${SRC_DIR}" excludes="**/*.java,**/*.form"/>
         </copy -->
+    </target>
+
+    <target name="dist" depends="compile">
+        <jar destfile="${BUILD_DIR}/vivae.jar" basedir="${CLASSES_DIR}">
+        </jar>
     </target>
 
     <target name="run">

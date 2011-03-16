@@ -223,7 +223,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-//        runVivaeDemo();
+        runVivaeDemo();
 //        runJoystickHWDemo();
 //        runFileReaderHWDemo();
 //        runMultipleDemo();
@@ -231,6 +231,6 @@ public class Main {
 //        runHWUserUIDemo();
 //        runVivaeUserUI();
 //        runFileWriterDemo();
-        runJoystickSWDemo();
+//        runJoystickSWDemo();
     }
 }
