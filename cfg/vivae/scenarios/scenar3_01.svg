@@ -441,7 +441,7 @@
   <g
      inkscape:groupmode="layer"
      id="layer4"
-     inkscape:label="Roboti"
+     inkscape:label="PositionMarki"
      style="display:inline"
      transform="translate(16.162441,12.147341)">
     <rect
@@ -451,9 +451,9 @@
        height="22.223356"
        x="108.8339"
        y="131.30457"
-       inkscape:label="Robot" />
+       inkscape:label="PositionMark" />
     <rect
-       inkscape:label="Robot"
+       inkscape:label="PositionMark"
        y="99.194954"
        x="584.37073"
        height="22.223356"
@@ -467,9 +467,9 @@
        height="22.223356"
        x="381.84271"
        y="381.74033"
-       inkscape:label="Robot" />
+       inkscape:label="PositionMark" />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="270.03403"
        x="36.499794"
        height="22.223356"
@@ -483,9 +483,9 @@
        height="22.223356"
        x="613.38519"
        y="210.49957"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="594.28784"
        x="92.154556"
        height="22.223356"
@@ -499,9 +499,9 @@
        height="22.223356"
        x="369.55682"
        y="228.39006"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="214.2283"
        x="325.33063"
        height="22.223356"
@@ -515,9 +515,9 @@
        height="22.223356"
        x="666.80139"
        y="430.9057"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="18.04851"
        x="363.28583"
        height="22.223356"
@@ -531,9 +531,9 @@
        height="22.223356"
        x="212.15462"
        y="225.7164"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="154.28786"
        x="673.58319"
        height="22.223356"
@@ -547,9 +547,9 @@
        height="22.223356"
        x="273.5831"
        y="11.430693"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="232.85922"
        x="490.72598"
        height="22.223356"
@@ -563,9 +563,9 @@
        height="22.223356"
        x="202.15462"
        y="144.28778"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="402.85925"
        x="256.44028"
        height="22.223356"
@@ -579,9 +579,9 @@
        height="22.223356"
        x="456.44028"
        y="342.85922"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="30.002054"
        x="186.44035"
        height="22.223356"
@@ -595,9 +595,9 @@
        height="22.223356"
        x="129.29752"
        y="491.43069"
-       inkscape:label="Robot" />
+       inkscape:label='PositionMark' />
     <rect
-       inkscape:label="Robot"
+       inkscape:label='PositionMark'
        y="525.71637"
        x="656.44031"
        height="22.223356"

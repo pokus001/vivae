@@ -1,4 +1,4 @@
-package robot;
+package vivae.robots;
 
 /**
  * @author bukz1
@@ -8,9 +8,7 @@ package robot;
 public interface IRobotInterface {
 
 //	public void initSensors(double[] positions);
-	
+
 	public void setWheelSpeed(double left, double right);
-	
-	public double[] getSensorData();
-	
+
 }

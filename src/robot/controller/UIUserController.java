@@ -1,6 +1,7 @@
 package robot.controller;
 
-import robot.IRobotInterface;
+import vivae.controllers.IRobotController;
+import vivae.robots.IRobotInterface;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +21,7 @@ public class UIUserController implements IRobotController {
         //no code needed here, the robot is driven by user
     }
 
-    public IRobotInterface getRobot() {
+    public IRobotInterface getControlledObject() {
         return robot;
     }
 }

@@ -96,7 +96,7 @@
        height="23.233509"
        x="69.948601"
        y="446.14508"
-       inkscape:label="Robot" />
+       inkscape:label="PositionMark" />
     <rect
        style="fill:#ff00ff;display:inline"
        id="rect2386"
@@ -104,6 +104,6 @@
        height="23.233509"
        x="190.31689"
        y="376.76648"
-       inkscape:label="Robot" />
+       inkscape:label="PositionMark" />
   </g>
 </svg>

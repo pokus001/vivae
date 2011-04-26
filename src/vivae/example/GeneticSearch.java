@@ -17,7 +17,6 @@ import vivae.fitness.AverageSpeed;
 import vivae.fitness.CombinedFitness;
 import vivae.fitness.Damage;
 import vivae.fitness.FitnessFunction;
-import vivae.fitness.MovablesOnTop;
 import vivae.util.Util;
 
 public class GeneticSearch {
@@ -42,42 +41,63 @@ public class GeneticSearch {
     }
 
     public static void main(String[] args) {
-        final String scenario = "cfg/vivae/scenarios/arena2.svg";
+        final String scenario = "cfg/vivae/scenarios/arena1.svg";
         final double mutationRate = 0.01;
         final double crossoverRate = 0.7;
-        final int generationCount = 25;
-        final int populationSize = 10;
+        final int generationCount = 5;
+        final int populationSize = 5;
+
+
+        long start = System.currentTimeMillis();
 
         final GeneticSearch exp = new GeneticSearch(scenario, mutationRate, crossoverRate, generationCount, populationSize);
         final int sensors = 5;
-        final int neurons = 5;
+        final int neurons = 2;
+        int robots=2;
+//        double[][][] wm = Util.randomArray3D(robots,neurons,2*sensors+neurons+1,-5,5);
+
+//        double[][][] wm = Util.randomArray3D(robots,neurons,2*sensors+neurons+1,-5,5);
+
+
+
 
         final double[][] wm = exp.runExperiment(neurons, sensors, 15, -15);
+
+        long end = System.currentTimeMillis();
+        System.out.println("Computation takes " + (end - start)/1000 + " sec.");
+
         try {
             System.in.read();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
         exp.playExperiment(scenario, wm);
+
     }
 
     private FitnessFunction experiment(double[][] wm, boolean visible) {
-        final FRNNExperiment exp = new FRNNExperiment();
-        exp.createArena(scenario, visible);
+        final TestExperiment exp = new TestExperiment();
         final double[][][] wm2 = new double[][][]{wm};
-        exp.setupExperiment(wm2, 50, 25);
+        try {
+            exp.setupExperiment(wm2, scenario, visible);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
 
-        FitnessFunction mot = new MovablesOnTop(exp.arena);// initialize fitness
-        FitnessFunction avg = new AverageSpeed(exp.arena);
-        FitnessFunction dmg = new Damage(exp.arena);
-        FitnessFunction comb = new CombinedFitness(new double[]{0.3, 0.7}, new FitnessFunction[]{dmg, avg});
+//        FitnessFunction mot = new MovablesOnTop(exp.arena);// initialize fitness
+        FitnessFunction avg = new AverageSpeed(exp);
+//        FitnessFunction dmg = new Damage(exp.arena);
+//        FitnessFunction comb = new CombinedFitness(new double[]{0.3, 0.7}, new FitnessFunction[]{dmg, avg});
         exp.startExperiment();
         System.out.println("average speed fitness = " + avg.getFitness());
-        System.out.println("average ontop fitness = " + mot.getFitness());
-        System.out.println("average damage fitness = " + dmg.getFitness());
-        System.out.println("combined fitness = " + comb.getFitness());
+//        System.out.println("average ontop fitness = " + mot.getFitness());
+//        System.out.println("average damage fitness = " + dmg.getFitness());
+//        System.out.println("combined fitness = " + comb.getFitness());
 
-        return comb;
+        return avg;
     }
 
     private void playExperiment(String scenario, double[][] wm) {

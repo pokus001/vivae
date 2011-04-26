@@ -1,6 +1,7 @@
-package robot.controller;
+package vivae.controllers;
 
-import robot.IRobotInterface;
+import vivae.controllers.IRobotController;
+import vivae.robots.IRobotInterface;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +17,7 @@ import java.util.Scanner;
  * Time: 3:07:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileReaderController implements IRobotController {
+public class FileReaderController extends VivaeController implements IRobotController {
     final private IRobotInterface robot;
 
     private class LeftRight {
@@ -51,17 +52,22 @@ public class FileReaderController implements IRobotController {
         }
     }
 
+    //just for compatibility
     public void step() {
+        moveControlledObject();
+    }
+
+    public void moveControlledObject() {
         if(iterator.hasNext()) {
             LeftRight leftRight = iterator.next();
 //            System.out.println(leftRight.left + " " + leftRight.right);
             robot.setWheelSpeed(leftRight.left, leftRight.right);
         } else {
-            
+            robot.setWheelSpeed(0,0);
         }
     }
 
-    public IRobotInterface getRobot() {
+    public IRobotInterface getControlledObject() {
         return robot;
     }
 }

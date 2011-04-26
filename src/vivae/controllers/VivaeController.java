@@ -9,7 +9,7 @@
 
 package vivae.controllers;
 
-import vivae.arena.parts.Active;
+import vivae.robots.IRobotInterface;
 
 /**
  * An abstract class for all controllers that are used to control the movement and behavior of active agents. 
@@ -17,24 +17,26 @@ import vivae.arena.parts.Active;
  * After creating a controller, register it to an Active ArenaPart and it will follow it's behavioral pattern.
  * @author Petr Smejkal
  */
-public abstract class VivaeController {
+public abstract class VivaeController implements IRobotController {
 
     /**
      * The Active ArenaPart that is to be controlled by this controller.
      */
-    protected Active controlledObject;
+    protected IRobotInterface controlledObject;
 
    /**
-    * Specify your logic here. 
     * This procedure is called in every iteration of the Arena loop to determine Active objects' movement.
+    * Controller just controls how robot wheels should be working - however, controlled object can have various logic how to work with these controlling
+    * e.g. when controller set fullspeed to both wheels while robot is actually not moving, some fade-in acceleration can be implemented in robot.
     */
     abstract public void moveControlledObject();
 
-    public Active getControlledObject() {
+    public IRobotInterface getControlledObject() {
         return controlledObject;
     }
 
-    public void setControlledObject(Active controlledObject) {
+    public void setControlledObject(IRobotInterface controlledObject) {
         this.controlledObject = controlledObject;
     }
+
 }

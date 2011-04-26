@@ -1,6 +1,6 @@
-package robot.controller;
+package vivae.controllers;
 
-import robot.IRobotInterface;
+import vivae.robots.IRobotInterface;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,5 +12,5 @@ import robot.IRobotInterface;
 public interface IRobotController {
     void step();
 
-    IRobotInterface getRobot();
+    IRobotInterface getControlledObject();
 }

@@ -6,14 +6,11 @@
  * at Czech Technical University in Prague
  * in 2008
  */
-package vivae.example;
+package vivae.arena.parts;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
 
 import net.phys2d.math.Vector2f;
 import net.phys2d.raw.Body;
@@ -21,37 +18,40 @@ import net.phys2d.raw.World;
 import net.phys2d.raw.shapes.Box;
 import vivae.arena.Arena;
 import vivae.arena.parts.sensors.*;
-import vivae.arena.parts.Robot;
-import vivae.arena.parts.VivaeObject;
+import vivae.robots.IRobotWithSensorsInterface;
+import vivae.robots.IRobotInterface;
 import vivae.util.Util;
 
 /**
  * @author HKou
  */
-public class FRNNControlledRobot extends Robot {
+public class FRNNControlledRobotRepresent extends VivaeRobotRepresent {
 
     protected double[][] sensoryData;
 
-    public FRNNControlledRobot(float x, float y) {
+    public FRNNControlledRobotRepresent(float x, float y) {
         super(x, y);
-        sensors = new Vector<Sensor>();
-        sensorsMap = new HashMap<Integer, Sensor>();
+
+        diameter = 12;
+        boundingCircleRadius = (float) Math.sqrt(2 * diameter * diameter) / 2;
+        myNumber = getNumber();
     }
 
-    public FRNNControlledRobot(Shape shape, int layer, Arena arena) {
+    public FRNNControlledRobotRepresent(Shape shape, int layer, Arena arena, IRobotInterface owner) {
         this((float) shape.getBounds2D().getCenterX(),
-                (float) shape.getBounds2D().getCenterY(), arena);
+                (float) shape.getBounds2D().getCenterY(), arena, owner);
     }
 
-    public FRNNControlledRobot(float x, float y, Arena arena) {
+    public FRNNControlledRobotRepresent(float x, float y, Arena arena, IRobotInterface owner) {
         this(x, y);
         diameter = 12;
         boundingCircleRadius = (float) Math.sqrt(2 * diameter * diameter) / 2;
         myNumber = getNumber();
         this.arena = arena;
+        this.owner = owner;
         this.world = arena.getWorld();
-        body = new Body("Robot", new Box(diameter, diameter), 50f);
-        body.setPosition((float) x, (float) y);
+        body = new Body("VivaeRobotRepresent", new Box(diameter, diameter), 50f);
+//        body.setPosition((float) x, (float) y);
         body.setRotation(0);
         body.setDamping(baseDamping);
         body.setRotDamping(ROT_DAMPING_MUTIPLYING_CONST * baseDamping);
@@ -61,63 +61,21 @@ public class FRNNControlledRobot extends Robot {
         centerY = (float) r.getCenterY();
     }
 
-    public void setSensors(int howMany, double startingAngle, double angleIncrement,
-            double maxDistance, double frictionDistance) {
-        for (int i = 0; i < howMany; i++) {
-            addDistanceSensor(startingAngle + i * angleIncrement, maxDistance);
-        }
-        for (int i = 0; i < howMany; i++) {
-            addFrictionSensor(startingAngle + i * angleIncrement, frictionDistance);
-        }
-    }
-
-    public void addDistanceSensor(Double angle, double maxDistance) {
-        Sensor s = new DistanceSensor(this, angle, sensorNumber, maxDistance);
-        sensors.add(s);
-        sensorsMap.put(sensorNumber, s);
-        sensorNumber++;
-    }
-
-    public void addFrictionSensor(Double angle, double frictionDistance) {
-        Sensor s = new SurfaceFrictionSensor(this, angle, sensorNumber, frictionDistance);
-        sensors.add(s);
-        sensorsMap.put(sensorNumber, s);
-        sensorNumber++;
-    }
-
-    public double[][] getSensoryData() {
-        double[][] data = new double[2][sensorNumber / 2];
-        Vector<VivaeObject> allObjects = getArena().getVivaes();
-        int di = 0, si = 0;
-        double v;
-        for (Iterator<Sensor> it = sensors.iterator(); it.hasNext();) {
-            Sensor sensor = it.next();
-            if (sensor instanceof DistanceSensor) {
-                v = ((DistanceSensor) sensor).getDistance(allObjects);
-                data[0][di] = v;
-                di++;
-            }
-            if (sensor instanceof SurfaceFrictionSensor) {
-                v = ((SurfaceFrictionSensor) sensor).getSurfaceFriction();
-                data[1][si] = Util.rescale(v, 1, 10);   // should min and max friction in the arena
-                si++;
-            }
-        }
-        sensoryData = data;
-        return data;
-    }
-
     @Override
     public void moveComponent() {
+
+
+
         inMotion = true;
+
+        setDamping(arena.getFrictionOfSurface(this));  //speedup
+
         direction = body.getRotation();
         net.phys2d.math.ROVector2f p = body.getPosition();
         x = p.getX();
         y = p.getY();
-        for (Iterator<Sensor> sIter = sensors.iterator(); sIter.hasNext();) {
-            Sensor s = (Sensor) sIter.next();
-            s.moveComponent();
-        }
+
+        //TODO: move this to controller !!
 
         final double distance = Util.euclideanDistance(lastX, lastY, x, y);
         final double velDist = lastVelocity - getSpeed() > 0 ? lastVelocity - getSpeed() : 0;
@@ -158,12 +116,43 @@ public class FRNNControlledRobot extends Robot {
         g2.fill(translation.createTransformedShape(getShape()));
         g2.setColor(Color.BLACK);
         g2.draw(translation.createTransformedShape(getShape()));
-        if (isShowingSensors) {
-            for (Iterator<Sensor> sIter = sensors.iterator(); sIter.hasNext();) {
-                Sensor s = (Sensor) sIter.next();
-                s.paintComponent(g2);
-            }
-        }
+
+//        ///=-=========== painting of sensors
+//        if(owner instanceof IRobotWithSensorsInterface)  {
+//            IRobotWithSensorsInterface rs = (IRobotWithSensorsInterface)owner;
+//            java.util.List <ISensor> sensors = rs.getSensors();
+//
+//
+//            //TODO: THIS HAS TO BE GENERIC
+//            for (ISensor s : sensors) {
+//                if(DistanceSensor)
+//            }
+//
+//            g2.drawString(s, baseX, baseY);
+//            baseY += STATUS_FRAME_LINE_HEIGHT;
+//            s = "";
+//
+////            for (int j = 0; j < sensoryData[1].length; j++) {
+////                s += String.format("%1.1f ", sensoryData[1][j]);
+////            }
+//            g2.drawString(s, baseX, baseY);
+//            g2.setComposite(oldComposite);
+//            g2.setColor(oldColor);
+//        }
+
+        //TODO: solve painting of sensors. Sensor representatnt as graphical component should be contained in Arena containers.
+//        if (isShowingSensors) {
+//            for (Iterator<Sensor> sIter = sensors.iterator(); sIter.hasNext();) {
+//                Sensor s = (Sensor) sIter.next();
+//                s.paintComponent(g2);
+//            }
+//        }
+
+
+
+
+
+
         if (isShowingStatusFrame) {
             paintStatusFrame(g2);
         }
@@ -173,10 +162,25 @@ public class FRNNControlledRobot extends Robot {
         }
     }
 
+    //TODO: this logic should be out of Represent...
     @Override
     public void accelerate(float s) {
         setSpeed(body.getVelocity().length());
-        s = Math.min(s, getMaxSpeed() - (float) getSpeed());
+        // if acceleration cause to exceed maxSpeed, decrease it
+
+//        System.out.println("Input s = " + s + ", getSpeed = " +
+//                getSpeed() + ", Maxspeed = " +
+//                getMaxSpeed() + ", MaxReverseSpeed = " + getMaxReverseSpeed());
+
+        //abs to protect flyaway when robot is pulled by other object (robot)
+        s = Math.min(s, Math.abs(getMaxSpeed() - (float) getSpeed()));
+//        System.out.print("S aftern Math.Min = "+ s);
+
+        // if "acceleration" to backward direction causes exceed maxReverseSpeed, decrease it
+        s = Math.max(s, -Math.abs((getMaxReverseSpeed() - (float) getSpeed())) );
+//        System.out.println(", S aftern Math.MAX = "+ s);
+
+
         float dx = (float) (s * (float) Math.cos(body.getRotation() - Math.PI / 2));
         float dy = (float) (s * (float) Math.sin(body.getRotation() - Math.PI / 2));
         body.adjustVelocity(new Vector2f(dx, dy));
@@ -205,32 +209,31 @@ public class FRNNControlledRobot extends Robot {
 
     @Override
     public String getActiveName() {
-        return "Robot";
+        return "VivaeRobotRepresent";
     }
 
     @Override
     public float getAcceleration() {
-        return Robot.ACCELERATION;
+        return VivaeRobotRepresent.ACCELERATION;
     }
 
     @Override
     public float getMaxSpeed() {
-        return Robot.MAX_SPEED;
+        return VivaeRobotRepresent.MAX_SPEED;
+    }
+
+    public float getMaxReverseSpeed() {
+        return VivaeRobotRepresent.MAX_SPEED/5;
     }
 
     @Override
     public float getRotationIncrement() {
-        return Robot.ROTATION;
+        return VivaeRobotRepresent.ROTATION;
     }
 
     @Override
     public String toString() {
-        return "Robot " + myNumber;
-    }
-
-    @Override
-    public Vector<Sensor> getSensors() {
-        return sensors;
+        return "VivaeRobotRepresent " + myNumber;
     }
 
     @Override
@@ -276,18 +279,25 @@ public class FRNNControlledRobot extends Robot {
         g2.drawString(String.format("y: %4.0f", y), baseX, baseY);
         baseY += STATUS_FRAME_LINE_HEIGHT;
         String s = "";
-        for (int j = 0; j < sensoryData[0].length; j++) {
-            s += String.format("%1.1f ", sensoryData[0][j]);
+        if(owner instanceof IRobotWithSensorsInterface)  {
+            IRobotWithSensorsInterface rs = (IRobotWithSensorsInterface)owner;
+            sensoryData = rs.getSensorData();
+            //TODO: THIS HAS TO BE GENERIC
+            for (int j = 0; j < sensoryData[0].length; j++) {
+                s += String.format("%1.1f ", sensoryData[0][j]);
+            }
+
+            g2.drawString(s, baseX, baseY);
+            baseY += STATUS_FRAME_LINE_HEIGHT;
+            s = "";
+
+//            for (int j = 0; j < sensoryData[1].length; j++) {
+//                s += String.format("%1.1f ", sensoryData[1][j]);
+//            }
+            g2.drawString(s, baseX, baseY);
+            g2.setComposite(oldComposite);
+            g2.setColor(oldColor);
         }
-        g2.drawString(s, baseX, baseY);
-        baseY += STATUS_FRAME_LINE_HEIGHT;
-        s = "";
-        for (int j = 0; j < sensoryData[1].length; j++) {
-            s += String.format("%1.1f ", sensoryData[1][j]);
-        }
-        g2.drawString(s, baseX, baseY);
-        g2.setComposite(oldComposite);
-        g2.setColor(oldColor);
     }
 }
 

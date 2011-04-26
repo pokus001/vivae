@@ -4,23 +4,31 @@
  */
 package robot;
 
+import java.awt.*;
+import java.awt.image.CropImageFilter;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import robot.eye.EyeImage;
+import vivae.robots.IRobotWithSensorsInterface;
+import vivae.sensors.ISensor;
 
 /**
  *
  * @author mirek
  */
-public class HardwareRobot implements IHardwareRobotInterface {
+public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensorsInterface {
 
     public static final String EYE_IMAGE_LEFT = "leftEye";
     public static final String EYE_IMAGE_RIGHT = "rightEye";
@@ -421,9 +429,32 @@ public class HardwareRobot implements IHardwareRobotInterface {
         return socket.isConnected();
     }
 
-    public double[] getSensorData() {
-        throw new IllegalStateException("Not yet implemented!");
+    public double[][] getSensorData() {
+        try{
+            EyeImage depth_map = getEyeImage(HardwareRobot.EYE_IMAGE_DEPTH_MAP, true);
+            Image i = depth_map.getImage(null);
+            //TODO: do some processing - crop, average, computations,  numbers, ...
+
+            ImageFilter filter = new CropImageFilter(73, 63, 141, 131);
+            ImageProducer producer = new FilteredImageSource(i.getSource(), filter);
+            //TODO: this will probably not work :) just try... [Ivo]
+            Image resultImage = new Canvas().createImage(producer);
+
+        } catch (IOException e) {
+            //TODO: handle exception
+            throw new IllegalStateException("IO exception for HW not implemented yet");
+        }
+        return null;
     }
+
+    public List<ISensor> getSensors() {
+        throw new IllegalStateException("HW robot does not allow to use its sensors from outside!");
+    }
+
+    public void addSensor(ISensor s) {
+        throw new IllegalStateException("Cannot add new sensor to Hardware robot - reimplement HWrobot class instead!");
+    }
+
 
     @Override
     public void finalize() {

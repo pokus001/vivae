@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -12,7 +13,7 @@
    height="480"
    id="svg2384"
    sodipodi:version="0.32"
-   inkscape:version="0.46"
+   inkscape:version="0.47 r22583"
    version="1.0"
    sodipodi:docname="arena1.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
@@ -45,7 +46,8 @@
      inkscape:window-width="899"
      inkscape:window-height="686"
      inkscape:window-x="8"
-     inkscape:window-y="54">
+     inkscape:window-y="54"
+     inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
        id="grid2395"
@@ -92,13 +94,13 @@
        y="90"
        inkscape:label="Road" />
     <rect
-       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.20000005;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="rect2391"
        width="20"
        height="20"
        x="560"
-       y="430"
-       inkscape:label="vivae.example.FRNNControlledRobot" />
+       y="330"
+       inkscape:label="PositionMark" />
     <rect
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect2402"
@@ -142,7 +144,7 @@
        height="20"
        x="130.68468"
        y="324.7027"
-       inkscape:label="vivae.example.FRNNControlledRobot" />
+       inkscape:label="PositionMark" />
     <path
        style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.20000005;stroke-linecap:square;stroke-miterlimit:4;stroke-opacity:1"
        d="M 270,270 L 350,270 L 350,300 L 270,300 L 270,270 z"
@@ -156,7 +158,7 @@
        height="20"
        x="300"
        y="400"
-       inkscape:label="vivae.example.FRNNControlledRobot" />
+       inkscape:label="PositionMark" />
     <rect
        style="fill:#999999;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect2394"

@@ -81,7 +81,9 @@ public class JoystickDriver {
     }
 
     private void pollEvents() {
-        EventQueue eventQueue = joystick.getEventQueue();
+        EventQueue eventQueue = null;
+        //TODO: find why this does not work when compile using ant!!!
+//        eventQueue = joystick.getEventQueue();
         Event event = new Event();
         while (running) {
             eventQueue.getNextEvent(event);

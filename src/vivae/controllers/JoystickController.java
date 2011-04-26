@@ -1,9 +1,10 @@
-package robot.controller;
+package vivae.controllers;
 
-import robot.IRobotInterface;
 import robot.joystick.JoystickDriver;
 import robot.joystick.JoystickEvent;
 import robot.joystick.JoystickListener;
+import vivae.controllers.IRobotController;
+import vivae.robots.IRobotInterface;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,7 +43,7 @@ public class JoystickController implements IRobotController {
         robot.setWheelSpeed(50 * left, 50 * right);
     }
 
-    public IRobotInterface getRobot() {
+    public IRobotInterface getControlledObject() {
         return robot;
     }
 

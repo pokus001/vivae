@@ -12,6 +12,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Vector;
 import net.phys2d.raw.Body;
 import net.phys2d.raw.shapes.Box;
+import vivae.robots.VivaeRobot;
 import vivae.arena.parts.Active;
 import vivae.arena.parts.VivaeObject;
 import vivae.arena.parts.Fixed;
@@ -21,7 +22,7 @@ import vivae.arena.parts.Fixed;
  */
 public abstract class Sensor extends Active{
 
-    protected Active owner;
+    protected VivaeRobot owner;
     protected Body ownerBody;
     protected float ray_length = 50f;
     protected float ray_width = 1f;
@@ -32,11 +33,11 @@ public abstract class Sensor extends Active{
     protected int sensorX, sensorY;
 
     /**
-     * This method removes all VivaeObjects that are further from owner of this Sensor
-     * than length of the Sensor is.
-     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this Sensor.
+     * This method removes all VivaeObjects that are further from owner of this ISensor
+     * than length of the ISensor is.
+     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this ISensor.
      * @param walls Vector of walls that can contain enclosing walls in Arena.
-     * @return new Vector of VivaeObjects that are close enough to be in range of Sensor.
+     * @return new Vector of VivaeObjects that are close enough to be in range of ISensor.
      */
     public Vector<VivaeObject> getCloseVivaes(Vector<VivaeObject> objects, Vector<Fixed> walls) {
 
@@ -47,8 +48,8 @@ public abstract class Sensor extends Active{
             }
         }
         if (!owner.getArena().isEnclosedWithWalls()) return closeObjects;
-        float xPos = owner.getBody().getPosition().getX();
-        float yPos = owner.getBody().getPosition().getY();
+        float xPos = owner.getRobotRepresent().getBody().getPosition().getX();
+        float yPos = owner.getRobotRepresent().getBody().getPosition().getY();
         if (ray_length > yPos) closeObjects.add(walls.get(0));
         else if (owner.getArena().screenHeight - ray_length < yPos) closeObjects.add(walls.get(1));
         if (ray_length > xPos) closeObjects.add(walls.get(3));
@@ -57,16 +58,16 @@ public abstract class Sensor extends Active{
     }
 
     /**
-     * Method intersects area of Sensor and all VivaeObjects and returns those that
+     * Method intersects area of ISensor and all VivaeObjects and returns those that
      * have non-zero intersection.
-     * @param objects Vector of VivaeObjects that are checked for collision with the body of Sensor.
-     * @return Vector of VivaeObjects that are in collision with the body of Sensor.
+     * @param objects Vector of VivaeObjects that are checked for collision with the body of ISensor.
+     * @return Vector of VivaeObjects that are in collision with the body of ISensor.
      */
     public Vector<VivaeObject> getVivaesOnSight(Vector<VivaeObject> objects){
         Vector<VivaeObject> objectsOnSight = new Vector<VivaeObject>();
         //for (VivaeObject vivaeObject : objects) {
         for (VivaeObject vivaeObject : getCloseVivaes(objects, owner.getArena().getWalls())) {
-            if (vivaeObject != this.owner) {
+            if (vivaeObject != this.owner.getRobotRepresent()) {
                 Area actArea = (Area) vivaeObject.getArea().clone();
                 actArea.intersect(this.getArea());
                 if (!actArea.isEmpty()) objectsOnSight.add(vivaeObject);
@@ -79,27 +80,29 @@ public abstract class Sensor extends Active{
 
 
 
-    public Sensor(Active owner, double angle, int number){
+    public Sensor(VivaeRobot owner, double angle, int number){
         this(owner, number);
         setAngle((float)angle);
     }
 
 
-    public Sensor(Active owner){
-        super(owner.centerX, owner.centerY);
-        this.ownerBody=owner.getBody();
+    public Sensor(VivaeRobot owner){
+        super(owner.getRobotRepresent().centerX, owner.getRobotRepresent().centerY);
+        this.ownerBody=owner.getRobotRepresent().getBody();
+        float x = this.ownerBody.getPosition().getX();
+        float y = this.ownerBody.getPosition().getY();
         this.owner=owner;
         //this.sensorNumber  = number();
     }
 
 
-    public Sensor(Active owner, int number) {
-        super(owner.centerX,owner.centerY);
+    public Sensor(VivaeRobot owner, int number) {
+        super(owner.getRobotRepresent().centerX,owner.getRobotRepresent().centerY);
         this.owner = owner;
-        this.ownerBody = owner.getBody();
+        this.ownerBody = owner.getRobotRepresent().getBody();
         this.sensorNumber = number;
-        body = new Body("Sensor", new Box(ray_length, ray_width), 50f);
-        body.addExcludedBody(owner.getBody());
+        body = new Body("ISensor", new Box(ray_length, ray_width), 50f);
+        body.addExcludedBody(owner.getRobotRepresent().getBody());
         body.setDamping(baseDamping);
         body.setRotDamping(ROT_DAMPING_MUTIPLYING_CONST * baseDamping);
         setShape(new Rectangle2D.Double(0,0,ray_length, ray_width));
@@ -109,7 +112,7 @@ public abstract class Sensor extends Active{
     @Override
     public void moveComponent(){
         inMotion = true;
-        direction = owner.getDirection() - (float)Math.PI/2;
+        direction = owner.getRobotRepresent().getDirection() - (float)Math.PI/2;
         direction += angle;
         net.phys2d.math.ROVector2f op = ownerBody.getPosition();
         x = op.getX();
@@ -168,7 +171,7 @@ public abstract class Sensor extends Active{
     @Override
     public String getActiveName() {
         // TODO Auto-generated method stub
-        return "Sensor";
+        return "ISensor";
     }
 
     @Override
@@ -214,7 +217,7 @@ public abstract class Sensor extends Active{
 
     @Override
     public String toString(){
-        return "Sensor " + sensorNumber + " on " + owner.toString();
+        return "ISensor " + sensorNumber + " on " + owner.toString();
     }
 
     @Override

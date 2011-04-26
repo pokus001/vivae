@@ -5,7 +5,7 @@
     <property name="CLASSES_DIR" value="${BUILD_DIR}/classes"/>
     <property name="SRC_DIR" value="src"/>
     <property name="LIB_DIR" value="lib"/>
-    <property name="DATA_DIR" value="cfg"/>
+    <property name="DATA_DIR" value="cfg/vivae"/>
 
     <target name="clean">
         <delete includeemptydirs="true">
@@ -15,10 +15,10 @@
 
     <target name="make_dirs">
         <mkdir dir="${CLASSES_DIR}"/>
-        <copy todir="${BUILD_DIR}/${DATA_DIR}">
+        <copy todir="${BUILD_DIR}/${DATA_DIR}"> 
             <fileset dir="${DATA_DIR}"/>
         </copy>
-        <copy todir="${BUILD_DIR}/${LIB_DIR}">
+        <copy todir="${BUILD_DIR}/${LIB_DIR}"> 
             <fileset dir="${LIB_DIR}"/>
         </copy>
     </target>
@@ -42,7 +42,7 @@
     </target>
 
     <target name="run">
-        <java classname="vivae.example.FRNNExperiment" fork="true" failonerror="true" dir="${BUILD_DIR}">
+        <java classname="vivae.example.TestExperiment" fork="true" failonerror="true" dir="${BUILD_DIR}">
             <classpath>
                 <fileset dir="${LIB_DIR}">
                     <include name="**/*.jar"/>
@@ -51,16 +51,4 @@
             </classpath>
         </java>
     </target>
-
-    <target name="cea">
-        <java classname="vivae.belkaram.main.ContinuousSearchMain" fork="true" failonerror="true" dir="${BUILD_DIR}">
-            <classpath>
-                <fileset dir="${LIB_DIR}">
-                    <include name="**/*.jar"/>
-                </fileset>
-                <pathelement location="${CLASSES_DIR}"/>
-            </classpath>
-        </java>
-    </target>
-
 </project>

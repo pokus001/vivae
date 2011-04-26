@@ -14,7 +14,7 @@ package robot.ui;
 import robot.HardwareRobot;
 import robot.HardwareRobotAdapter;
 import robot.IHardwareRobotInterface;
-import robot.IRobotInterface;
+import vivae.robots.IRobotInterface;
 import robot.eye.EyeImage;
 import robot.joystick.JoystickDriver;
 

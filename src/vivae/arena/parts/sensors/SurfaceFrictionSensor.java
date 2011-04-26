@@ -5,7 +5,7 @@ import java.awt.geom.*;
 import java.util.Vector;
 import net.phys2d.raw.Body;
 import net.phys2d.raw.shapes.Box;
-import vivae.arena.parts.Active;
+import vivae.robots.VivaeRobot;
 import vivae.arena.parts.VivaeObject;
 import vivae.arena.parts.Surface;
 import vivae.util.PathIntersection;
@@ -15,7 +15,7 @@ import vivae.util.PathIntersection;
  */
 public class SurfaceFrictionSensor extends Sensor{
 
-    protected Active owner;
+    protected VivaeRobot owner;
     protected Body ownerBody;
     protected float ray_length = 5f;
     protected float ray_width = 5f;
@@ -28,11 +28,11 @@ public class SurfaceFrictionSensor extends Sensor{
     protected double actualFriction=3f;
 
     /**
-     * This method removes all VivaeObjects that are further from owner of this Sensor
-     * than length of the Sensor is.
-     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this Sensor.
+     * This method removes all VivaeObjects that are further from owner of this ISensor
+     * than length of the ISensor is.
+     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this ISensor.
      * @param walls Vector of walls that can contain enclosing walls in Arena.
-     * @return new Vector of VivaeObjects that are close enough to be in range of Sensor.
+     * @return new Vector of VivaeObjects that are close enough to be in range of ISensor.
      */
     /* getBoundingCircleradius has to go to VivaeObject instead of Vivae, also surfaces have the b.c.)
     public Vector<Surface> getCloseSurafaces(Vector<Surface> objects, Vector<Fixed> walls) {
@@ -55,10 +55,10 @@ public class SurfaceFrictionSensor extends Sensor{
     } */
 
     /**
-     * Method intersects area of Sensor and all VivaeObjects and returns those that
+     * Method intersects area of ISensor and all VivaeObjects and returns those that
      * have non-zero intersection.
-     * @param objects Vector of VivaeObjects that are checked for collision with the body of Sensor.
-     * @return Vector of VivaeObjects that are in collision with the body of Sensor.
+     * @param objects Vector of VivaeObjects that are checked for collision with the body of ISensor.
+     * @return Vector of VivaeObjects that are in collision with the body of ISensor.
      */
     public Vector<VivaeObject> getVivaesOnSight(Vector<VivaeObject> objects){
         Vector<VivaeObject> objectsOnSight = new Vector<VivaeObject>();
@@ -67,7 +67,7 @@ public class SurfaceFrictionSensor extends Sensor{
         PathIntersection pi = new PathIntersection();
         Point2D.Double[] points;
         for (VivaeObject vivaeObject : getCloseVivaes(objects, owner.getArena().getWalls())) {
-            if (vivaeObject != this.owner) {
+            if (vivaeObject != this.owner.getRobotRepresent()) {
                 GeneralPath gp = new GeneralPath(vivaeObject.getTransformedShape());
                 points = pi.getIntersections(thisPath,gp);
                 System.out.println(points.length);
@@ -114,7 +114,7 @@ public class SurfaceFrictionSensor extends Sensor{
 
 
 
-    public SurfaceFrictionSensor(Active owner, double angle, int number, double distance){
+    public SurfaceFrictionSensor(VivaeRobot owner, double angle, int number, double distance){
         this(owner, number,distance);
         setAngle((float)angle);
 
@@ -129,13 +129,13 @@ public class SurfaceFrictionSensor extends Sensor{
     }
      */
 
-    public SurfaceFrictionSensor(Active owner, int number, double distance) {
+    public SurfaceFrictionSensor(VivaeRobot owner, int number, double distance) {
         super(owner);
         this.owner = owner;
-        this.ownerBody = owner.getBody();
+        this.ownerBody = owner.getRobotRepresent().getBody();
         this.sensorNumber = number;
-        body = new Body("Sensor", new Box(ray_length, ray_width), 50f);
-        body.addExcludedBody(owner.getBody());
+        body = new Body("SurfaceFrictionSensor", new Box(ray_length, ray_width), 50f);
+        body.addExcludedBody(owner.getRobotRepresent().getBody());
         body.setDamping(baseDamping);
         body.setRotDamping(ROT_DAMPING_MUTIPLYING_CONST * baseDamping);
         setShape(new Rectangle2D.Double(distance,0,ray_length, ray_width));
@@ -145,7 +145,7 @@ public class SurfaceFrictionSensor extends Sensor{
     @Override
     public void moveComponent(){
         inMotion = true;
-        direction = owner.getDirection() - (float)Math.PI/2;
+        direction = owner.getRobotRepresent().getDirection() - (float)Math.PI/2;
         direction += angle;
         net.phys2d.math.ROVector2f op = ownerBody.getPosition();
         x = op.getX();
@@ -154,6 +154,7 @@ public class SurfaceFrictionSensor extends Sensor{
         float newY = (float)(y + (ray_length/2)*Math.sin(direction));
         body.setPosition(newX,newY);
         body.setRotation(direction);
+//        System.out.println("Moving ccomponent to " + newX + ", " + newY);
     }
 
     public AffineTransform getTranslation(){
@@ -166,6 +167,7 @@ public class SurfaceFrictionSensor extends Sensor{
 
     @Override
     public void paintComponent(Graphics g) {
+//        System.out.println("Painting surface sensor");
         Graphics2D g2 = (Graphics2D) g;
         Object hint = new Object();
         if(isAntialiased()){
@@ -208,7 +210,7 @@ public class SurfaceFrictionSensor extends Sensor{
     @Override
     public String getActiveName() {
         // TODO Auto-generated method stub
-        return "Sensor";
+        return "ISensor";
     }
 
     @Override
@@ -254,7 +256,7 @@ public class SurfaceFrictionSensor extends Sensor{
 
     @Override
     public String toString(){
-        return "Sensor " + sensorNumber + " on " + owner.toString();
+        return "ISensor " + sensorNumber + " on " + owner.toString();
     }
 
     @Override

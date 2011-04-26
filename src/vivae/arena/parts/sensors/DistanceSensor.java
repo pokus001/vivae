@@ -10,7 +10,7 @@ import java.awt.geom.*;
 import java.util.Vector;
 import net.phys2d.raw.Body;
 import net.phys2d.raw.shapes.Box;
-import vivae.arena.parts.Active;
+import vivae.robots.VivaeRobot;
 import vivae.arena.parts.VivaeObject;
 import vivae.arena.parts.Fixed;
 import vivae.util.PathIntersection;
@@ -20,7 +20,7 @@ import vivae.util.PathIntersection;
  */
 public class DistanceSensor extends Sensor{
 
-    protected Active owner;
+    protected VivaeRobot owner;
     protected Body ownerBody;
     protected float ray_length = 100f;
     protected float ray_width = 1f;
@@ -31,11 +31,11 @@ public class DistanceSensor extends Sensor{
     protected int sensorX, sensorY;
 
     /**
-     * This method removes all VivaeObjects that are further from owner of this Sensor
-     * than length of the Sensor is.
-     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this Sensor.
+     * This method removes all VivaeObjects that are further from owner of this ISensor
+     * than length of the ISensor is.
+     * @param objects Vector of all VivaeObjects that are checked for distance from owner of this ISensor.
      * @param walls Vector of walls that can contain enclosing walls in Arena.
-     * @return new Vector of VivaeObjects that are close enough to be in range of Sensor.
+     * @return new Vector of VivaeObjects that are close enough to be in range of ISensor.
      */
     public Vector<VivaeObject> getCloseVivaes(Vector<VivaeObject> objects, Vector<Fixed> walls) {
 
@@ -47,8 +47,8 @@ public class DistanceSensor extends Sensor{
             }
         }
         if (!owner.getArena().isEnclosedWithWalls()) return closeObjects;
-        float xPos = owner.getBody().getPosition().getX();
-        float yPos = owner.getBody().getPosition().getY();
+        float xPos = owner.getRobotRepresent().getBody().getPosition().getX();
+        float yPos = owner.getRobotRepresent().getBody().getPosition().getY();
         if (ray_length > yPos) closeObjects.add(walls.get(0));
         else if (owner.getArena().screenHeight - ray_length < yPos) closeObjects.add(walls.get(1));
         if (ray_length > xPos) closeObjects.add(walls.get(3));
@@ -57,10 +57,10 @@ public class DistanceSensor extends Sensor{
     }
 
     /**
-     * Method intersects area of Sensor and all VivaeObjects and returns those that
+     * Method intersects area of ISensor and all VivaeObjects and returns those that
      * have non-zero intersection.
-     * @param objects Vector of VivaeObjects that are checked for collision with the body of Sensor.
-     * @return Vector of VivaeObjects that are in collision with the body of Sensor.
+     * @param objects Vector of VivaeObjects that are checked for collision with the body of ISensor.
+     * @return Vector of VivaeObjects that are in collision with the body of ISensor.
      */
     public Vector<VivaeObject> getVivaesOnSight(Vector<VivaeObject> objects){
         Vector<VivaeObject> objectsOnSight = new Vector<VivaeObject>();
@@ -69,7 +69,7 @@ public class DistanceSensor extends Sensor{
         PathIntersection pi = new PathIntersection();
         Point2D.Double[] points;
         for (VivaeObject vivaeObject : getCloseVivaes(objects, owner.getArena().getWalls())) {
-            if (vivaeObject != this.owner) {
+            if (vivaeObject != this.owner.getRobotRepresent()) {
                 GeneralPath gp = new GeneralPath(vivaeObject.getTransformedShape());
                 points = pi.getIntersections(thisPath,gp);
                 System.out.println(points.length);
@@ -95,11 +95,11 @@ public class DistanceSensor extends Sensor{
         double dist = ray_length;
         double nd;
         for (VivaeObject vivaeObject : getCloseVivaes(objects, owner.getArena().getWalls())) {
-            if (vivaeObject != this.owner) {
+            if (vivaeObject != this.owner.getRobotRepresent()) {
                 GeneralPath gp = new GeneralPath(vivaeObject.getTransformedShape());
                 points = pi.getIntersections(thisPath,gp);
                 for(Point2D.Double point : points){
-                    nd=pi.euclideanDistance(point.getX(),point.getY(),owner.getX(),owner.getY());
+                    nd=pi.euclideanDistance(point.getX(),point.getY(),owner.getRobotRepresent().getX(),owner.getRobotRepresent().getY());
                     if(nd<dist)dist=nd;
                     //System.out.println(dist);
                 }
@@ -110,7 +110,7 @@ public class DistanceSensor extends Sensor{
 
 
 
-    public DistanceSensor(Active owner, double angle, int number, double maxDistance){
+    public DistanceSensor(VivaeRobot owner, double angle, int number, double maxDistance){
         this(owner, number,maxDistance);
         setAngle((float)angle);
         ray_length=(float)maxDistance;
@@ -126,24 +126,25 @@ public class DistanceSensor extends Sensor{
     }
      */
 
-    public DistanceSensor(Active owner, int number, double maxDistance) {
+    public DistanceSensor(VivaeRobot owner, int number, double maxDistance) {
         super(owner);
         this.owner = owner;
-        this.ownerBody = owner.getBody();
+        this.ownerBody = owner.getRobotRepresent().getBody();
         this.sensorNumber = number;
         ray_length=(float)maxDistance;
-        body = new Body("Sensor", new Box(ray_length, ray_width), 50f);
-        body.addExcludedBody(owner.getBody());
+        body = new Body("DistanceSensor", new Box(ray_length, ray_width), 50f);
+        body.addExcludedBody(owner.getRobotRepresent().getBody());
         body.setDamping(baseDamping);
         body.setRotDamping(ROT_DAMPING_MUTIPLYING_CONST * baseDamping);
         setShape(new Line2D.Double(0,0,ray_length, 0));
+        System.out.println("Creagin Distance sensor, OwnerBodyx = " + ownerBody.getPosition().getX() + ", Y = " + ownerBody.getPosition().getY());
     }
 
 
     @Override
     public void moveComponent(){
         inMotion = true;
-        direction = owner.getDirection() - (float)Math.PI/2;
+        direction = owner.getRobotRepresent().getDirection() - (float)Math.PI/2;
         direction += angle;
         net.phys2d.math.ROVector2f op = ownerBody.getPosition();
         x = op.getX();
@@ -202,7 +203,7 @@ public class DistanceSensor extends Sensor{
     @Override
     public String getActiveName() {
         // TODO Auto-generated method stub
-        return "Sensor";
+        return "ISensor";
     }
 
     @Override
@@ -248,7 +249,7 @@ public class DistanceSensor extends Sensor{
 
     @Override
     public String toString(){
-        return "Sensor " + sensorNumber + " on " + owner.toString();
+        return "ISensor " + sensorNumber + " on " + owner.toString();
     }
 
     @Override

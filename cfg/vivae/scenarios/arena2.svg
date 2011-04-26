@@ -98,7 +98,7 @@
        height="20"
        x="560"
        y="430"
-       inkscape:label="vivae.example.FRNNControlledRobot" />
+       inkscape:label="vivae.arena.parts.PositionMark" />
     <rect
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect2402"

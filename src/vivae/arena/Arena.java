@@ -16,8 +16,10 @@ import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.svg.SVGDocument;
+import vivae.example.IExperiment;
+import vivae.robots.IRobotInterface;
 import vivae.arena.parts.*;
-import vivae.arena.parts.Robot;
+import vivae.arena.parts.VivaeRobotRepresent;
 import vivae.controllers.KeyboardVivaeController;
 import vivae.controllers.VivaeController;
 import vivae.util.ArenaPartsGenerator;
@@ -31,9 +33,8 @@ import java.awt.event.KeyListener;
 import java.awt.geom.Area;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -58,11 +59,11 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     /**
      * Screen width.
      */
-    public int screenWidth = 1;
+    public int screenWidth = 640;
     /**
      * Screen height.
      */
-    public int screenHeight = 1;
+    public int screenHeight = 480;
     /**
      * The physical world representing the arena (see Phys2D docs).
      */
@@ -83,6 +84,15 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * Vector of Active objects in the arena.
      */
     protected Vector<Active> actives = new Vector<Active>();
+
+
+    protected java.util.List<PositionMark> positions;
+    protected List<VivaeObject> paintable;
+
+//    /**
+//     * Vector of Active objects in the arena.
+//     */
+//    protected Vector<Active> activesPositions = new Vector<Active>  ();
     /**
      * Vector of all VivaeObjects in the arena.
      */
@@ -123,6 +133,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * A boolean deciding whether an output to SVG is possible.
      */
     protected boolean isSVGGraphicsInitialized = false;
+
     /**
      * Determines whether the simulation is running or not.
      */
@@ -147,6 +158,8 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     private boolean isEnclosedWithWalls = false;
     private final boolean DEBUG_FRICTION_CACHE = false;
     private String svgFileName = "";
+
+
 
     /**
      * Sets up a new screen size.
@@ -235,6 +248,8 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         }
         screenWidth = loader.getWidth();
         screenHeight = loader.getHeight();
+        positions = new ArrayList<PositionMark>();
+        paintable = new ArrayList<VivaeObject>();
         Vector<HashMap<String, Vector<Shape>>> shapeMap = loader.getShapesWithTypeMap();
         int l = 1;
         for (HashMap<String, Vector<Shape>> m : shapeMap) {
@@ -244,15 +259,36 @@ public class Arena extends JPanel implements KeyListener, Runnable {
                 for (ArenaPart vivae : v) {
                     if (Surface.class.isAssignableFrom(vivae.getClass())) {
                         addSurface((Surface) vivae);
-                    } else if (Passive.class.isAssignableFrom(vivae.getClass())) {
+                    } else if (PositionMark.class.isAssignableFrom(vivae.getClass())) {
+                        addPosition((PositionMark) vivae);
+                    }
+                    else if (Passive.class.isAssignableFrom(vivae.getClass())) {
                         addPassive((Passive) vivae);
-                    } else if (Active.class.isAssignableFrom(vivae.getClass())) {
-                        addActive((Active) vivae);
+//                    this should not happen anymore - actives (robots added by experiment, not SVG file !!!)
+// } else if (Active.class.isAssignableFrom(vivae.getClass())) {
+//                        activesPositions.add((Active) vivae);
                     }
                 }
             }
             l++;
         }
+    }
+
+    private void addPosition(PositionMark pos) {
+        positions.add(pos);
+    }
+
+    public void addPaintable(VivaeObject vo) {
+        paintable.add(vo);
+    }
+
+    public void assignRobotRepresent(VivaeRobotRepresent repr) {
+        int activePositionsCnt = positions.size();
+        PositionMark pattern = positions.get(actives.size() % activePositionsCnt);
+        repr.getBody().setPosition((float) pattern.getX(), (float) pattern.getY());
+        repr.setArena(this);
+        repr.setWorld(getWorld());
+        addActive((Active) repr);
     }
 
     /**
@@ -262,10 +298,10 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * @param agent      The Active the controller will control.
      * @param controller The controller specifing behavior of the Active object.
      */
-    public void registerController(Active agent, VivaeController controller) {
+    public void registerController(IRobotInterface agent, VivaeController controller) {
         controller.setControlledObject(agent);
         controllers.add(controller);
-        if (agent instanceof Robot && controller instanceof KeyboardVivaeController) {
+        if (agent instanceof VivaeRobotRepresent && controller instanceof KeyboardVivaeController) {
             if (parent != null) {
                 parent.addKeyListener((KeyboardVivaeController) controller);
             }
@@ -412,6 +448,9 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         for (Passive vivaeObject : getPassives()) {
             vivaeObject.paintComponent(bufferGraphics, isObjectsOnSightBlinking);
         }
+        for (VivaeObject vivaeObject : getPaintable()) {
+            vivaeObject.paintComponent(bufferGraphics, isObjectsOnSightBlinking);
+        }
         for (Active active : actives) {
             active.paintComponent(bufferGraphics, isObjectsOnSightBlinking);
         }
@@ -445,13 +484,16 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * @param actor
      */
     public float getFrictionOfSurface(VivaeObject actor) {
-        Vector<Surface> surfacesActorIsOn = new Vector<Surface>();
+
+        ArrayList<Surface> surfacesActorIsOn = new ArrayList<Surface>();
         Surface srfc;
+        Area actArea = actor.getArea();
+
         for (Surface surface : surfaces) {
             srfc = surface;
-            Area actArea = actor.getArea();
-            actArea.intersect(srfc.getArea());
-            if (!actArea.isEmpty()) {
+            Area actor2intersect = (Area)actArea.clone();
+            actor2intersect.intersect(srfc.getArea());
+            if (!actor2intersect.isEmpty()) {
                 surfacesActorIsOn.add(srfc);
             }
         }
@@ -459,7 +501,10 @@ public class Arena extends JPanel implements KeyListener, Runnable {
             return 0f;
         }
         srfc = surfacesActorIsOn.get(surfacesActorIsOn.size() - 1);
-        return srfc.getFriction();
+
+        float res = srfc.getFriction();
+//        System.out.println("Surface = " + srfc.getClass().toString() + " has friction " + res);
+        return res;
     }
 
     public Surface getSurfaceUnderVivaeObject(VivaeObject actor) {
@@ -480,13 +525,17 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         return srfc;
     }
 
+    public void moveActive(Active a) {
+        a.moveComponent();
+    }
+
     /**
      * Sets up new coordinates and rotation of all VivaeObjects according to their movement.
      */
     public void moveVivaes() {
-        for (Active active : actives) {
-            active.moveComponent();
-        }
+//        for (Active active : actives) {
+//            active.moveComponent();
+//        }
         for (Passive passive : passives) {
             passive.moveComponent();
         }
@@ -516,7 +565,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
                     active.setStatusFramePinedToPosition(!active.isStatusFramePinedToPosition());
                 }
                 break;
-            case KeyEvent.VK_S:
+            case KeyEvent.VK_C:
                 // captures an SVG output
                 captureToSVG(svgOutputFileName);
                 break;
@@ -654,6 +703,19 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         this.passives = passives;
     }
 
+//    public Vector<Active> getActivesPositions() {
+//        return activesPositions;
+//    }
+
+
+    public Component getParentVindow() {
+        return parent;
+    }
+
+    public List<PositionMark> getPositions() {
+        return positions;
+    }
+
     public Vector<VivaeObject> getVivaes() {
         return vivaes;
     }
@@ -736,6 +798,10 @@ public class Arena extends JPanel implements KeyListener, Runnable {
 
     public Vector<Fixed> getWalls() {
         return walls;
+    }
+
+    public List<VivaeObject> getPaintable() {
+        return paintable;
     }
 }
 

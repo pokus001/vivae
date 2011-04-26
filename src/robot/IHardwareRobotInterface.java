@@ -8,6 +8,7 @@ package robot;
 import java.io.IOException;
 import java.util.Map;
 import robot.eye.EyeImage;
+import vivae.robots.IRobotInterface;
 
 /**
  *

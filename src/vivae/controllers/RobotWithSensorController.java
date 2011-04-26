@@ -12,10 +12,10 @@
 package vivae.controllers;
 
 import java.util.Vector;
-import vivae.arena.parts.Active;
-import vivae.arena.parts.Robot;
-import vivae.arena.parts.sensors.Sensor;
+
+import vivae.robots.IRobotInterface;
 import vivae.arena.parts.VivaeObject;
+import vivae.robots.IRobotWithSensorsInterface;
 
 /**
  * One of the extensions of the basic VivaeController class specifiing Active object's behavior. 
@@ -26,17 +26,16 @@ import vivae.arena.parts.VivaeObject;
 public abstract class RobotWithSensorController extends VivaeController{
     
     /**
-     * A boolean variable specifiing if the Robot has been set up.
+     * A boolean variable specifiing if the VivaeRobotRepresent has been set up.
      */
     protected boolean isRobotSet = false;
-    /**
-     * The Active object controlled by this controller. This time it's Robot, one of Active's ascendants, because the Active object here has to have Sensors.
-     */
-    protected Robot robot;
-    /**
-     * A Vector of Snesors of the controlled robot.
-     */
-    protected Vector<Sensor> sensors;
+
+    //why should controller has sensors array??? to be delted...
+//    /**
+//     * A Vector of Snesors of the controlled robot.
+//     */
+//    protected Vector<ISensor> sensors;
+
     /**
      * This Vector of VivaeObjects can be used to store all Objects in the Arena.
      * The sensors will then search them for those of them that are on sight. 
@@ -48,22 +47,15 @@ public abstract class RobotWithSensorController extends VivaeController{
     protected Vector<VivaeObject> objectsOnSight = new Vector<VivaeObject>();
 
     @Override
-    public Active getControlledObject() {
-        return robot;
+    public IRobotWithSensorsInterface getControlledObject() {
+        return (IRobotWithSensorsInterface) controlledObject;
     }
 
     @Override
-    public void setControlledObject(Active controlledObject) {
-        this.controlledObject = controlledObject;
-        if(controlledObject instanceof Robot) {
-            this.robot = (Robot) controlledObject;
-            this.isRobotSet = true;
-            this.sensors = this.robot.getSensors();
-        }
-        else {
-            System.err.println("Error, cannot assign non-Robot type as a controlled object for RobotWithSensorController");
-            
-        }
+    public void setControlledObject(IRobotInterface controlledObject) {
+        //TODO: test na spravny typ pres diskriminator...
+        this.controlledObject = (IRobotWithSensorsInterface) controlledObject;
+        this.isRobotSet = true;
     }
     
     

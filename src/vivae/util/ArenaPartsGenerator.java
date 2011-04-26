@@ -30,7 +30,7 @@ public class ArenaPartsGenerator {
      * Takes a map of shapes indexed by their type and creates Vector of ArenaParts.
      * @param shapesWithTypeMap a map of shapes the ArenaParts are to be made of.
      * @param layer Specifies which layer the ArenaParts that we've created are on.
-     * @param arena An Arena Reference is required for Robot's constructor.
+     * @param arena An Arena Reference is required for VivaeRobotRepresent's constructor.
      * @return Vector of ArenaParts
      */
     public static Vector<ArenaPart> createParts(
@@ -53,7 +53,7 @@ public class ArenaPartsGenerator {
      * @param shape Determines the shape.
      * @param type  Specifies the type of the future ArenaPart.
      * @param layer Number of the layer in the arena if it is a surface.
-     * @param arena An Arena reference is required for Robot's constructor. 
+     * @param arena An Arena reference is required for VivaeRobotRepresent's constructor.
      * @return A new ArenaPart child class.
      */
     public static ArenaPart createPart(Shape shape, String type, int layer, Arena arena) {
@@ -64,6 +64,7 @@ public class ArenaPartsGenerator {
 
         try {
             Constructor cons = null;
+
             //pokud jmeno nema balicek, tak se predpoklada vivae.arena.parts
             if(!type.contains(".")) {
                 type = "vivae.arena.parts." + type;

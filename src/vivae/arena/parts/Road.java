@@ -86,7 +86,7 @@ public class Road extends Surface {
 
     @Override
     public String toString(){
-        return "Sand Surface VivaeObject at " + "[" + getX() + ", " + getY() + "]";
+        return "Road Surface VivaeObject at " + "[" + getX() + ", " + getY() + "], bounds " + shape.getBounds2D();
     }
 
 }

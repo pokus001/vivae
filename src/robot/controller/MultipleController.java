@@ -1,6 +1,7 @@
 package robot.controller;
 
-import robot.IRobotInterface;
+import vivae.controllers.IRobotController;
+import vivae.robots.IRobotInterface;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,7 +23,7 @@ public class MultipleController implements IRobotController {
         }
     }
 
-    public IRobotInterface getRobot() {
+    public IRobotInterface getControlledObject() {
         return null;
     }
 }

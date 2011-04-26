@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 
-package robot;
+package vivae.robots;
+
+import vivae.robots.IRobotInterface;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +16,7 @@ import java.io.PrintStream;
  *
  * @author drchaj1
  */
-public class FileWriterRobot implements IRobotInterface { 
+public class FileWriterRobot implements IRobotInterface {
     PrintStream stream;
 
     public FileWriterRobot(PrintStream stream) {

@@ -1,5 +1,7 @@
 package robot.controller;
 
+import vivae.controllers.IRobotController;
+
 /**
  * Created by IntelliJ IDEA.
  * User: drchaj1

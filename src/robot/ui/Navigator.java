@@ -4,7 +4,7 @@
  */
 package robot.ui;
 
-import robot.IRobotInterface;
+import vivae.robots.IRobotInterface;
 import robot.joystick.JoystickDriver;
 import robot.joystick.JoystickEvent;
 import robot.joystick.JoystickListener;
