@@ -1,5 +1,6 @@
 package vivae.controllers;
 
+import robot.HardwareRobot;
 import vivae.controllers.IRobotController;
 import vivae.robots.IRobotInterface;
 
@@ -25,6 +26,10 @@ public class DemoController extends VivaeController implements IRobotController 
     public void step() {
         if (stepCount < 50) {
             controlledObject.setWheelSpeed(1, 1);
+            //just for testing  [IKO]
+            if(controlledObject instanceof HardwareRobot){
+                ((HardwareRobot)controlledObject).getSensorData();
+            }
         } else if (stepCount < 200) {
             controlledObject.setWheelSpeed(1, 0.3);
         } else if (stepCount < 300) {

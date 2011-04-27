@@ -5,11 +5,10 @@
 package robot;
 
 import java.awt.*;
-import java.awt.image.CropImageFilter;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageFilter;
-import java.awt.image.ImageProducer;
+import java.awt.geom.AffineTransform;
+import java.awt.image.*;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -23,6 +22,8 @@ import java.util.logging.Logger;
 import robot.eye.EyeImage;
 import vivae.robots.IRobotWithSensorsInterface;
 import vivae.sensors.ISensor;
+
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -61,6 +62,18 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
     public static final int EYE_LEFT_RGB = 1;
     public static final int EYE_RIGHT_RGB = 2;
     public static final int EYE_DISTANCE_MAP = 3;
+
+    //defines crop for distance image
+    // default 0, 240, 640, 240 => bottom half of image
+    private static final int CROP_X = 0;
+    private static final int CROP_Y = 240;
+    private static final int CROP_WIDTH = 640;
+    private static final int CROP_HEIGHT = 240;
+
+    //defines scale how distance should be changed
+    //default = 0.1 => image 64 x 48
+    private static final double DISTANCE_SCALE = 0.1;
+
     private int timeout = 1000;
     private String hostname = "localhost";
     private int port = 5000;
@@ -347,7 +360,6 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
         EyeImage image = EyeImage.createEyeImage(w, h, imageType, data);
 
         return image;
-
     }
 
     public Map<String,Object> getStatus() throws IOException {
@@ -429,23 +441,102 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
         return socket.isConnected();
     }
 
+    /**
+     *
+     */
     public double[][] getSensorData() {
-        try{
-            EyeImage depth_map = getEyeImage(HardwareRobot.EYE_IMAGE_DEPTH_MAP, true);
-            Image i = depth_map.getImage(null);
-            //TODO: do some processing - crop, average, computations,  numbers, ...
 
-            ImageFilter filter = new CropImageFilter(73, 63, 141, 131);
-            ImageProducer producer = new FilteredImageSource(i.getSource(), filter);
-            //TODO: this will probably not work :) just try... [Ivo]
-            Image resultImage = new Canvas().createImage(producer);
+
+        int columnCnt = (int)(CROP_WIDTH * DISTANCE_SCALE);
+        int linesCnt = (int)(CROP_HEIGHT * DISTANCE_SCALE);
+        double columnMaxes[] = new double[64];
+
+        try{
+
+//            Image im = getEyeImage(HardwareRobot.EYE_IMAGE_DEPTH_MAP, true).getImage(null);
+
+            //for testing purposes, also possible to load from file
+            BufferedImage im = ImageIO.read(new File("depthMap.jpg"));
+
+            BufferedImage fullsizeBi = new BufferedImage (im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
+            Graphics bg = fullsizeBi.getGraphics();
+            bg.drawImage(im, 0, 0, null);
+            bg.dispose();
+
+            //now we have full-size BufferImage. Let's do crop:
+            BufferedImage croppedBi = fullsizeBi.getSubimage(CROP_X, CROP_Y, CROP_WIDTH, CROP_HEIGHT);
+
+            //
+
+            int w = (int)(DISTANCE_SCALE*croppedBi.getWidth());
+            int h = (int)(DISTANCE_SCALE*croppedBi.getHeight());
+            BufferedImage scaledBi = new BufferedImage(w, h, croppedBi.getType());
+            Graphics2D g2 = scaledBi.createGraphics();
+            // scale on–the–fly
+            AffineTransform at = AffineTransform.getScaleInstance(DISTANCE_SCALE, DISTANCE_SCALE);
+            g2.drawRenderedImage(croppedBi, at);
+            g2.dispose();
+
+            //debuggin purposes - can save cropped and scaled image to filesystem
+            File file = new File("img2save.jpg");
+            ImageIO.write(scaledBi, "jpg", file);  // ignore returned boolean
+
+            //get pixels from Image. Pixels are 4-bytes Integers in ARGB form - so need to split R,G,B and process it
+            int pixels[] = scaledBi.getRGB(0, 0, columnCnt, linesCnt, null, 0, columnCnt);
+            for(int columnIdx = 0; columnIdx < columnCnt; columnIdx++) {
+
+                //higher number = lighter points
+                double columnmax = 0;
+                for(int rowIdx = 0; rowIdx < linesCnt; rowIdx++) {
+                    int cellIdx = rowIdx * columnCnt + columnIdx;
+                    int fourBytes = pixels[cellIdx];
+
+                    int r,g,b;
+                    //each color 0...255
+                    r=((fourBytes & 0x00FF0000) >> 16);
+                    g=((fourBytes & 0x0000FF00) >> 8);
+                    b=((fourBytes & 0x000000FF));
+                    //intensity in interval 0..255
+                    double intensity = 0.2989*r +  0.5870*g + 0.1140*b;
+
+                    //currently processing takes maximum from each column.
+                    if(intensity > columnmax) {
+                        columnmax = intensity;
+                    }
+                }
+                columnMaxes[columnIdx] = columnmax;
+//                System.out.println("[" + columnIdx + "] Columnmax = " + columnmax);
+            }
+
+
+            //rescale doubles 0..255 to 0..1 as usual for sensors
+            double ret[][] = new double [1][columnCnt];
+            for(int i = 0; i < columnCnt; i++) {
+                ret[0][i] = columnMaxes[i] / 255;
+                System.out.print(Math.round(columnMaxes[i]) + ", ");
+            }
+            System.out.println();
+
+            return ret;
 
         } catch (IOException e) {
-            //TODO: handle exception
-            throw new IllegalStateException("IO exception for HW not implemented yet");
+            e.printStackTrace();
         }
+
+        //only if error happens
         return null;
     }
+
+//    private static BufferedImage toBufferedImage(Image src) {
+//        int w = src.getWidth(null);
+//        int h = src.getHeight(null);
+//        int type = BufferedImage.TYPE_INT_RGB;  // other options
+//        BufferedImage dest = new BufferedImage(w, h, type);
+//        Graphics2D g2 = dest.createGraphics();
+//        g2.drawImage(src, 0, 0, null);
+//        g2.dispose();
+//        return dest;
+//    }
 
     public List<ISensor> getSensors() {
         throw new IllegalStateException("HW robot does not allow to use its sensors from outside!");

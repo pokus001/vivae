@@ -87,10 +87,13 @@ public class TestExperiment extends BasicExperiment{
         va1.addSensor(new OdometerSensor(va1));
         va2.addSensor(new OdometerSensor(va2));
 
+        HardwareRobot hr = new HardwareRobot("localhost", 6005);
+
         KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
-        KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
+//        KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
+//          KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
 //        FRNNController frnnc1 = new FRNNController(va2, wm[0]);
-        DemoController dc = new DemoController(va2);
+        DemoController dc = new DemoController(hr);
 //        FileReaderController frc = new FileReaderController(va2, "reply_run.txt");
 
 
@@ -99,7 +102,7 @@ public class TestExperiment extends BasicExperiment{
 //        controllers.add(frnnc1);                        `
 //        controllers.add(dc);
         controllers.add(kbc);
-        controllers.add(kbc2);
+//        controllers.add(hr);
 //        controllers.add(frnnc2);
 
 
@@ -107,8 +110,8 @@ public class TestExperiment extends BasicExperiment{
         robots.add(va1);
         robots.add(va2);
 
-        HardwareRobot hr = new HardwareRobot("localhost", 6005);
-        KeyboardVivaeController kbhrc = new KeyboardVivaeController(hr);
+
+//        KeyboardVivaeController kbhrc = new KeyboardVivaeController(hr);
 
 //        hr.connect();
 //        hr.setMaxWheelSpeed(10);
@@ -117,6 +120,8 @@ public class TestExperiment extends BasicExperiment{
 
 
         robots.add(hr);
+
+        hr.getSensorData();
     }
 
     public void startExperiment() {
