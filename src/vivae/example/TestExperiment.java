@@ -10,17 +10,15 @@ package vivae.example;
 
 import robot.HardwareRobot;
 import robot.IHardwareRobotInterface;
-import vivae.controllers.DemoController;
-import vivae.controllers.FileReaderController;
-import vivae.controllers.KeyboardVivaeController;
+import vivae.controllers.*;
 import vivae.robots.FileWriterRobot;
 import vivae.robots.IRobotInterface;
 import vivae.robots.VivaeRobot;
 //import robot.VivaeRobotTmp;
 import vivae.arena.Arena;
-import vivae.controllers.VivaeController;
 import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
+import vivae.sensors.AsyncScalableDistanceSensor;
 import vivae.sensors.OdometerSensor;
 import vivae.util.Util;
 
@@ -76,39 +74,42 @@ public class TestExperiment extends BasicExperiment{
 //        va1.addSensor(new ScalableDistanceSensor(va1 ,sangle, eangle, sensors_cnt, 50));
 //        va2.addSensor(new ScalableDistanceSensor(va2 ,sangle, eangle, sensors_cnt, 50));
 //
+
+        va1.addSensor(new AsyncScalableDistanceSensor(va1, sangle, eangle, sensors_cnt, 50));
+
 //        for (int i = 0; i < sensors_cnt; i++) {
 //            va1.addDistanceSensor(sangle + i * ai, 50);
 //            va2.addDistanceSensor(sangle + i * ai, 50);
 //        }
-        for (int i = 0; i < sensors_cnt; i++) {
-            va1.addFrictionSensor(sangle + i * ai, 25);
-            va2.addFrictionSensor(sangle + i * ai, 25);
-        }
+//        for (int i = 0; i < sensors_cnt; i++) {
+//            va1.addFrictionSensor(sangle + i * ai, 25);
+//            va2.addFrictionSensor(sangle + i * ai, 25);
+//        }
         va1.addSensor(new OdometerSensor(va1));
-        va2.addSensor(new OdometerSensor(va2));
+//        va2.addSensor(new OdometerSensor(va2));
 
-        HardwareRobot hr = new HardwareRobot("localhost", 6005);
+//        HardwareRobot hr = new HardwareRobot("localhost", 6005);
 
-        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
+//        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
 //        KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
 //          KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
-//        FRNNController frnnc1 = new FRNNController(va2, wm[0]);
-        DemoController dc = new DemoController(hr);
+//        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
+        DemoController dc = new DemoController(va1);
 //        FileReaderController frc = new FileReaderController(va2, "reply_run.txt");
 
 
 //        FRNNController frnnc2 = new FRNNController(va2, wm[0]);
 //        KeyboardVivaeController kbc = new KeyboardVivaeController(va2);
-//        controllers.add(frnnc1);                        `
+//        controllers.add(frnnc1);
 //        controllers.add(dc);
-        controllers.add(kbc);
+        controllers.add(dc);
 //        controllers.add(hr);
 //        controllers.add(frnnc2);
 
 
 
         robots.add(va1);
-        robots.add(va2);
+//        robots.add(va2);
 
 
 //        KeyboardVivaeController kbhrc = new KeyboardVivaeController(hr);
@@ -119,9 +120,9 @@ public class TestExperiment extends BasicExperiment{
 
 
 
-        robots.add(hr);
+//        robots.add(hr);
 
-        hr.getSensorData();
+//        hr.getSensorData();
     }
 
     public void startExperiment() {
@@ -141,7 +142,7 @@ public class TestExperiment extends BasicExperiment{
         vivaeArena.setScreenSize(640, 480);
         vivaeArena.initWorld();
 
-        for (int i = 1; i < 50000; i++) {
+        for (int i = 1; i < 5000; i++) {
 
             ListIterator<VivaeController> ci = controllers.listIterator();
             while (ci.hasNext()) {

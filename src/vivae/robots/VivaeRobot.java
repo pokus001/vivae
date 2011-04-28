@@ -2,10 +2,7 @@ package vivae.robots;
 
 import vivae.arena.Arena;
 import vivae.arena.parts.*;
-import vivae.sensors.DistanceSensor;
-import vivae.sensors.ISensor;
-import vivae.sensors.ScalableDistanceSensor;
-import vivae.sensors.SurfaceFrictionSensor;
+import vivae.sensors.*;
 import vivae.util.Util;
 
 import java.util.*;
@@ -139,6 +136,9 @@ public class VivaeRobot implements IRobotWithSensorsInterface {
             if (sensor instanceof ScalableDistanceSensor) {
                 sdsNeeded += ((ScalableDistanceSensor) sensor).getCount();
             }
+            if (sensor instanceof AsyncScalableDistanceSensor) {
+                sdsNeeded += ((AsyncScalableDistanceSensor) sensor).getCount();
+            }
         }
         maxNeeded = Math.max(Math.max(dsNeeded, sfsNeeded), sdsNeeded);
 
@@ -166,6 +166,13 @@ public class VivaeRobot implements IRobotWithSensorsInterface {
             }
             if (sensor instanceof ScalableDistanceSensor) {
                 double[][] sensorData = ((ScalableDistanceSensor) sensor).getSensoryData();
+                //TODO; this construction is bullshit, do something with that...
+                vv =  sensorData[0];
+                data[0] = vv;
+                di++;
+            }
+            if (sensor instanceof AsyncScalableDistanceSensor) {
+                double[][] sensorData = ((AsyncScalableDistanceSensor) sensor).getSensoryData();
                 //TODO; this construction is bullshit, do something with that...
                 vv =  sensorData[0];
                 data[0] = vv;

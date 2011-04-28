@@ -137,7 +137,6 @@ public class DistanceSensor extends Sensor{
         body.setDamping(baseDamping);
         body.setRotDamping(ROT_DAMPING_MUTIPLYING_CONST * baseDamping);
         setShape(new Line2D.Double(0,0,ray_length, 0));
-        System.out.println("Creagin Distance sensor, OwnerBodyx = " + ownerBody.getPosition().getX() + ", Y = " + ownerBody.getPosition().getY());
     }
 
 

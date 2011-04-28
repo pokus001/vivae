@@ -96,7 +96,6 @@ public class KeyboardVivaeController extends VivaeController implements KeyListe
     }
 
     public void keyTyped(KeyEvent e) {
-//       System.out.println("kbc: keyTyped - not implemented");
     }
 
 //    @Override

@@ -44,8 +44,8 @@ public class GeneticSearch {
         final String scenario = "cfg/vivae/scenarios/arena1.svg";
         final double mutationRate = 0.01;
         final double crossoverRate = 0.7;
-        final int generationCount = 5;
-        final int populationSize = 5;
+        final int generationCount = 10;
+        final int populationSize = 10;
 
 
         long start = System.currentTimeMillis();

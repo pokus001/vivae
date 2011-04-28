@@ -18,14 +18,14 @@ import java.util.List;
  */
 public class ScalableDistanceSensor implements ISensor {
 
-    private List<vivae.arena.parts.sensors.DistanceSensor> representants;
-    private VivaeRobot owner;
-    private Arena arena;
-    private VivaeRobotRepresent ownerRepresent;
-    private double maxDistance;
-    private double sangle;
-    private double eangle;
-    private int count;
+    protected List<vivae.arena.parts.sensors.DistanceSensor> representants;
+    protected VivaeRobot owner;
+    protected Arena arena;
+    protected VivaeRobotRepresent ownerRepresent;
+    protected double maxDistance;
+    protected double sangle;
+    protected double eangle;
+    protected int count;
 
     public ScalableDistanceSensor(IRobotWithSensorsInterface robot, double sangle, double eangle, int count, double maxDistance) {
 
