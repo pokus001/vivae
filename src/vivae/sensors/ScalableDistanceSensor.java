@@ -35,7 +35,7 @@ public class ScalableDistanceSensor implements ISensor {
             this.sangle = sangle;
             this.eangle = eangle;
             this.count = count;
-            this.arena = ownerRepresent.getArena();
+            this.arena = Arena.getArena();
             this.maxDistance = maxDistance;
 
             this.representants = new ArrayList<DistanceSensor>();

@@ -36,7 +36,7 @@ public class OdometerSensor implements ISensor {
     }
 
     public void moveComponent() {
-        // no need to do anything
+        // no need to do anything - no repreyzentant
         return;
     }
 

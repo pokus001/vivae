@@ -4,19 +4,18 @@
  */
 package robot;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import robot.eye.EyeImage;
@@ -77,7 +76,73 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
     private int timeout = 1000;
     private String hostname = "localhost";
     private int port = 5000;
-    Socket socket = new Socket();
+    private Socket socket = new Socket();
+    private long time = System.currentTimeMillis();
+
+    //async sensory data catching related variables:
+    private static final int TIMER_VALUE_MS = 500;
+    protected boolean isRunning = false;
+    protected Timer updateTimer;
+    protected double[][] cachedSensorData;
+    private static final boolean USE_CACHED_DATA = true;
+    private boolean sensorTimerRunning = false;
+    private static final boolean OFFLINE_TEST_MODE = true;
+
+    private class updateTime extends TimerTask {
+
+        private HardwareRobot robot;
+
+        updateTime(HardwareRobot robot) {
+            this.robot = robot;
+        }
+
+        @Override
+        public void run() {
+            robot.updateSensoryData();
+        }
+
+    }
+
+
+
+    public synchronized void setPidParams(double K, double Ti, double Td, double k0) throws IOException {
+        int resp;
+        String cmd;
+        cmd = String.format(Locale.US,
+                "set_pid_params %.3f %.3f %.3f %.3f;", K, Ti, Td, k0);
+        resp = sendCommand(cmd);
+        if (resp != RESP_DONE) {
+            throw new IOException("BlueCar command Error");
+        }
+
+    }
+
+    public void setWheelSpeed(double left, double right) {
+        try{
+            setWheelSpeed(left, right, 500);
+        } catch (IOException e) {
+            //TODO: add exception
+
+        }
+    }
+
+    public static class StatusValue {
+        private Object value;
+        private String name;
+        public StatusValue(String name, Object value) {
+            this.value = value;
+            this.name = name;
+        }
+        public Object getValue() {
+            return value;
+        }
+        public double getValueAsDouble() {
+            return ((Double)value).doubleValue();
+        }
+        public String getName() {
+            return name;
+        }
+    }
 
     private int readChar(InputStream is) throws IOException {
         long startTime = System.currentTimeMillis();
@@ -140,7 +205,7 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
             int avail = is.available();
             count += is.read(data, count, Math.min(avail, size - count));
             if ((System.currentTimeMillis() - startTime) > timeout) {
-//                throw new IOException("response timeouted");
+                throw new IOException("response timeouted");
             }
         } while (count < size);
         return data;
@@ -222,14 +287,14 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
     /**
      * Tato metoda vytvori spojeni s robotem
      */
-    public void connect() throws IOException {
+    public synchronized void connect() throws IOException {
         socket.connect(new InetSocketAddress(hostname, port));
     }
 
     /**
      * Tato metoda uzavre spojeni s robotem
      */
-    public void disconnect() throws IOException {
+    public synchronized void disconnect() throws IOException {
         socket.close();
         socket = new Socket();
     }
@@ -242,7 +307,7 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
      * Pokud speed je zaporne, robot omezeni maximalni rychlosti ingnoruje.
      *
      */
-    public void setMaxWheelSpeed(double speed) throws IOException {
+    public synchronized void setMaxWheelSpeed(double speed) throws IOException {
         int resp;
         String cmd;
         cmd = String.format(Locale.US,
@@ -276,10 +341,11 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
      * byt zavisle na napeti baterie.
      *
      */
-    public void setWheelSpeed(double left, double right, double duration)
+    public synchronized void setWheelSpeed(double left, double right, double duration)
             throws IOException {
         int resp;
         String cmd;
+
         cmd = String.format(Locale.US,
                 "set_wheel_speed %.1f %.1f %.3f;",
                 left, right, duration);
@@ -289,23 +355,11 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
                 && resp != RESP_ALERT_RIGHT
                 && resp != RESP_ALERT_BACK
                 && resp != RESP_ALERT_FRONT) {
-            throw new IOException("BlueCar command Error");
+            throw new IOException(String.format("BlueCar command Error (%d)", resp));
         }
     }
 
-    //dhonza pouze docasne, duration bude nastavovano jinak
-    public void setWheelSpeed(double left, double right) {
-        try {
-            setWheelSpeed(left, right, 5.0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * 
-     */
-    public EyeImage getEyeImage(String what, boolean capture) throws IOException {
+    public  synchronized EyeImage getEyeImage(String what, boolean capture) throws IOException {
         int w, h, size;
         String s;
         String cmd = String.format(Locale.US, "get_eye_image %s %d;", what,
@@ -360,12 +414,26 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
         EyeImage image = EyeImage.createEyeImage(w, h, imageType, data);
 
         return image;
+
     }
 
-    public Map<String,Object> getStatus() throws IOException {
+    private void parseStatusItem(String id, String name, double scale, InputStream is,
+            String terminator, Map<String,StatusValue> status) throws IOException {
+        String s;
+        double v;
+        s = readToken(is);
+        v = Double.parseDouble(s) * scale;
+        s = readToken(is);
+        if (!s.equals(terminator)) {
+           throw new IOException("invalid response format");
+        }
+        status.put(id, new StatusValue(name, v));
+    }
+    
+    public synchronized Map<String, StatusValue> getStatus() throws IOException {
         String cmd, s;
         double v;
-        Map<String,Object> status = new HashMap<String,Object>();
+        Map<String,StatusValue> status = new HashMap<String,StatusValue>();
         
         cmd = String.format(Locale.US,
                 "get_status;");
@@ -378,49 +446,25 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
            throw new IOException("invalid response format");
         }
 
-        // battery voltage
-        s = readToken(is);
-        v = Double.parseDouble(s);
-        s = readToken(is);
-        if (!s.equals(",")) {
-           throw new IOException("invalid response format");
-        }
-        status.put("Battery voltage", v);
-
-        // battery current
-        s = readToken(is);
-        v = Double.parseDouble(s);
-        s = readToken(is);
-        if (!s.equals(",")) {
-           throw new IOException("invalid response format");
-        }
-        status.put("Battery current", v);
-
-        s = readToken(is);
-        v = Double.parseDouble(s);
-        s = readToken(is);
-        if (!s.equals(",")) {
-           throw new IOException("invalid response format");
-        }
-        status.put("IR front-left sensor", v);
-
-        s = readToken(is);
-        v = Double.parseDouble(s);
-        s = readToken(is);
-        if (!s.equals(",")) {
-           throw new IOException("invalid response format");
-        }
-        status.put("IR fron-right sensor", v);
-
-        s = readToken(is);
-        v = Double.parseDouble(s);
-        status.put("IR back-center sensor", v);
-
-        s = readToken(is);
-        if (!s.equals("}")) {
-           throw new IOException("invalid response format");
-        }
-
+        parseStatusItem("time", "Time [ms]", 0.001, is, ",", status);
+        parseStatusItem("battery-current", "Battery current [A]", 0.001, is, ",", status);
+        parseStatusItem("battery-voltage", "Battery voltage [V]", 0.001, is, ",", status);
+        parseStatusItem("ir-front-left", "IR sensor front-left [cm]", 0.01, is, ",", status);
+        parseStatusItem("ir-front-right", "IR sensor front-right [cm]", 0.01, is, ",", status);
+        parseStatusItem("ir- back-center", "IR sensor back-center [cm]", 0.01, is, ",", status);
+        parseStatusItem("acceleration-x", "Acceleration X [m/s2]", 9.81E-3,is, ",", status);
+        parseStatusItem("acceleration-y", "Acceleration Y [m/s2]", 9.81E-3,is, ",", status);
+        parseStatusItem("acceleration-z", "Acceleration Z [m/s2]", 9.81E-3,is, ",", status);
+        parseStatusItem("velocity-left", "Velocity left [cm/s]", 0.1, is, ",", status);
+        parseStatusItem("velocity-right", "Velocity right [cm/s]", 0.1, is, ",", status);
+        parseStatusItem("distance-left", "Distance left [cm]", 1, is, ",", status);
+        parseStatusItem("distance-right", "Distance right [cm]", 1, is, ",", status);
+        parseStatusItem("desired-speed-left", "Desired speed left [%]", 0.1, is, ",", status);
+        parseStatusItem("desired-speed-right", "Desired speed right [%]", 0.1, is, ",", status);
+        parseStatusItem("motor-speed-left", "Motor speed left [%]", 0.1, is, ",", status);
+        parseStatusItem("motor-speed-right", "Motor speed left [%]", 0.1, is, ",", status);
+        parseStatusItem("max-wheel-speed", "Max wheel speed [cm/s]", 1, is, "}", status);
+        
         int ack = readCmdAck(is);
         if (ack != RESP_DONE) {
             throw new IOException("error reading status");
@@ -429,34 +473,66 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
         return status;
     }
 
-    public String getHostname() {
+    public  synchronized String getHostname() {
         return hostname;
     }
 
-    public int getPort() {
+    public  synchronized int getPort() {
         return port;
     }
 
-    public boolean isConnected() {
+    public  synchronized boolean isConnected() {
         return socket.isConnected();
     }
+
 
     /**
      *
      */
-    public double[][] getSensorData() {
 
+    public double[][] getSensorData() {
+        if(!USE_CACHED_DATA) {
+            //always update
+            updateSensoryData();
+            return cachedSensorData;
+        } else {
+            //updated using timer - let's start the timer
+            if(!sensorTimerRunning) {
+                updateTimer = new Timer();
+                updateTimer.schedule (new updateTime(this) , 0, TIMER_VALUE_MS);
+                sensorTimerRunning = true;
+            }
+            if(cachedSensorData == null) {
+                updateSensoryData();
+            }
+            return cachedSensorData;
+        }
+    }
+
+    public synchronized void updateSensoryData() {
+
+        if(OFFLINE_TEST_MODE) {
+           double[][] tst = new double[1][64];
+            for(int i = 0; i < 64; i++) {
+                tst[0][i] = Math.random();
+            }
+            cachedSensorData = tst;
+        }
 
         int columnCnt = (int)(CROP_WIDTH * DISTANCE_SCALE);
         int linesCnt = (int)(CROP_HEIGHT * DISTANCE_SCALE);
-        double columnMaxes[] = new double[64];
+        double columnMaxes[] = new double[columnCnt];
 
         try{
 
-//            Image im = getEyeImage(HardwareRobot.EYE_IMAGE_DEPTH_MAP, true).getImage(null);
+
+            long start = System.currentTimeMillis();
+            Image im = getEyeImage(HardwareRobot.EYE_IMAGE_DEPTH_MAP, true).getImage(null);
+            long end = System.currentTimeMillis();
+            System.out.println("Getting distance map takes " + (end - start) +  " ms.");
 
             //for testing purposes, also possible to load from file
-            BufferedImage im = ImageIO.read(new File("depthMap.jpg"));
+//            BufferedImage im = ImageIO.read(new File("depthMap.jpg"));
 
             BufferedImage fullsizeBi = new BufferedImage (im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
             Graphics bg = fullsizeBi.getGraphics();
@@ -517,14 +593,12 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
             }
             System.out.println();
 
-            return ret;
+            cachedSensorData = ret;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //only if error happens
-        return null;
     }
 
 //    private static BufferedImage toBufferedImage(Image src) {

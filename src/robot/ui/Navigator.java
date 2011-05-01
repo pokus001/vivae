@@ -4,61 +4,62 @@
  */
 package robot.ui;
 
-import vivae.robots.IRobotInterface;
 import robot.joystick.JoystickDriver;
 import robot.joystick.JoystickEvent;
 import robot.joystick.JoystickListener;
+import vivae.robots.IRobotInterface;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JComponent;
 
 /**
+ *
  * @author mirek
  */
 public class Navigator extends JComponent implements MouseListener,
         MouseMotionListener, JoystickListener {
 
-//    private final static double duration = 5.0; // 5 seconds
+    private final static double duration = 5.0; // 5 seconds
     private int posX = 0;
     private int posY = 0;
     private int touchX = 0;
     private int touchY = 0;
     private double leftWheelSpeedScale;
     private double rightWheelSpeedScale;
+    private double leftSpeed;
+    private double rightSpeed;
     private static final int graphBorder = 20;
     private IRobotInterface robot;
-    private JoystickDriver joystickDriver;
+    private JoystickDriver joystickController;
 
     public Navigator() {
         super();
         addMouseListener(this);
         addMouseMotionListener(this);
-        /*
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(t, 0, 100);
-        TimerTask t = new TimerTask() {
-
-        @Override
-        public void run() {
-
-        }
-        }
-         */
+        leftSpeed = 0;
+        rightSpeed = 0;
     }
 
     public void setRobot(IRobotInterface robot) {
         this.robot = robot;
     }
 
-    public void setJoystickController(JoystickDriver joystickDriver) {
-        this.joystickDriver = joystickDriver;
-        if (joystickDriver != null) {
+    public void setJoystickDriver(JoystickDriver joystickController) {
+        this.joystickController = joystickController;
+        if (joystickController != null) {
             removeMouseListener(this);
             removeMouseMotionListener(this);
-            joystickDriver.addJoystickListener(this);
+            joystickController.addJoystickListener(this);
         }
     }
 
@@ -106,15 +107,16 @@ public class Navigator extends JComponent implements MouseListener,
     public void mouseReleased(MouseEvent e) {
         posX = 0;
         posY = 0;
-//        try {
-        if (robot == null) {
-            return;
-        }
-//            robot.setWheelSpeed(0, 0, duration);
-        robot.setWheelSpeed(0, 0);
+     //   try {
+     //       if (robot == null) {
+    //            return;
+      //      }
+        //    robot.setWheelSpeed(0, 0, duration);
+            leftSpeed = 0;
+            rightSpeed = 0;
 //        } catch (IOException ex) {
-//            Logger.getLogger(Navigator.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+  //          Logger.getLogger(Navigator.class.getName()).log(Level.SEVERE, null, ex);
+    //    }
         repaint();
     }
 
@@ -157,16 +159,27 @@ public class Navigator extends JComponent implements MouseListener,
 
     private void robotMove(int gwidth, int gheight) {
         if (robot != null) {
-//            try {
-            double speed = -(double) posY / (double) gheight * 2.0 * 100.0;
-            double ratio = 1 - Math.abs((double) posX) / (double) gwidth * 2;
-            double leftSpeed = (posX < 0) ? (speed * ratio) : speed;
-            double rightSpeed = (posX > 0) ? (speed * ratio) : speed;
-            robot.setWheelSpeed(leftSpeed, rightSpeed);
+      //      try {
+                double y = -(double) posY / (double) gheight * 2.0;
+                double x = (double) posX / (double) gwidth * 2.0;
+                double dist = Math.sqrt(x*x + y*y);
+                if (dist > 1) dist = 1.0;
+                double speed = dist * Math.signum(y) * 100.0;
+                double ratio = 1 - Math.abs(x) / dist;
+                leftSpeed = (posX < 0) ? (speed * ratio) : speed;
+                rightSpeed = (posX > 0) ? (speed * ratio) : speed;
 //                robot.setWheelSpeed(leftSpeed, rightSpeed, duration);
 //            } catch (IOException ex) {
-//                Logger.getLogger(Navigator.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+  //              Logger.getLogger(Navigator.class.getName()).log(Level.SEVERE, null, ex);
+    //        }
         }
+    }
+
+    public double getLeftSpeed() {
+        return leftSpeed;
+    }
+
+    public double getRightSpeed() {
+        return rightSpeed;
     }
 }

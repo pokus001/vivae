@@ -1,4 +1,4 @@
-package vivae.example;
+package vivae.util;
 
 import java.awt.event.KeyEvent;
 

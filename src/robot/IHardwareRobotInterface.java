@@ -24,7 +24,7 @@ public interface IHardwareRobotInterface extends IRobotInterface {
 
     EyeImage getEyeImage(String what, boolean capture) throws IOException;
 
-    Map<String,Object> getStatus() throws IOException;
+    Map<String,HardwareRobot.StatusValue> getStatus() throws IOException;
 
     String getHostname();
 

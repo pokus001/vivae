@@ -27,7 +27,7 @@ public class DistanceSensor implements ISensor {
             this.owner = (VivaeRobot) robot;
             this.ownerRepresent = this.owner.getRobotRepresent();
             this.angle = angle;
-            this.arena = ownerRepresent.getArena();
+            this.arena = Arena.getArena();
             this.maxDistance = maxDistance;
             representant = new vivae.arena.parts.sensors.DistanceSensor(owner, angle, 0, maxDistance);
             arena.addPaintable(representant);

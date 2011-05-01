@@ -10,9 +10,8 @@
 package vivae.controllers;
 
 import vivae.arena.Arena;
-import vivae.example.KeyboardLayout;
+import vivae.util.KeyboardLayout;
 import vivae.robots.IRobotInterface;
-import vivae.robots.IRobotWithSensorsInterface;
 import vivae.robots.VivaeRobot;
 
 import java.awt.event.KeyEvent;
@@ -39,14 +38,13 @@ public class KeyboardVivaeController extends VivaeController implements KeyListe
         this.controlledObject = controlledObject;
         this.layout = layout ;
 
-        //for virtual robots in Arnea, also assign keylistener...
-        if(VivaeRobot.class.isAssignableFrom(controlledObject.getClass())) {
-            Arena arena = ((VivaeRobot) controlledObject).getArena();
+        if(Arena.isArenaUsed()) {
+            //Arena exists, let's register as key listerner there
+            Arena arena =  Arena.getArena();
             if(arena.getParentVindow() != null) {
                 arena.getParentVindow().addKeyListener(this);
             }
         }
-
     }
 
 

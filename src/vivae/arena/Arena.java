@@ -44,6 +44,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Arena extends JPanel implements KeyListener, Runnable {
 
     /**
+     * Instance of Arena, for handling Singleton pattern
+     */
+    private static Arena Ainstance;
+
+    /**
      * Thread sleep time in milisecs.
      */
     public int loopSleepTime = 10;
@@ -174,6 +179,38 @@ public class Arena extends JPanel implements KeyListener, Runnable {
             bufferGraphics = (Graphics2D) offscreen.getGraphics();
         }
     }
+
+    /**
+     * Singleton-like method, however creation should be handled by renewArena()
+     * @return Arena created before.
+     */
+    public static Arena getArena(){
+        if(Ainstance == null) {
+            throw new IllegalStateException("call to getArena() before arena was initialized!");
+        }
+        return Ainstance;
+    }
+
+    /**
+     * This is a way how to create a new arena when a new experiment is being set-uped.
+     * If normal singleton was used for Arena, different executions of experiment inside some high-level
+     * application (algorithms etc.) caused that next execution used ending Arena from preivous one - incl. objects positions etc.
+     * @param frame in which Arena should be placed. Null = no visualization.
+     * @return newly created Arena
+     */
+    public static Arena renewArena(Frame frame) {
+        Ainstance = new Arena(frame);
+        return Ainstance;
+    }
+
+    /**
+     *
+     * @return truth value saying if Arena is initialized
+     */
+    public static boolean isArenaUsed() {
+        return (Ainstance != null);
+    }
+
 
     /**
      * Arena consturctor.

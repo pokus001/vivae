@@ -20,6 +20,7 @@ import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
 import vivae.sensors.AsyncScalableDistanceSensor;
 import vivae.sensors.OdometerSensor;
+import vivae.util.KeyboardLayout;
 import vivae.util.Util;
 
 import javax.swing.*;
@@ -32,6 +33,7 @@ public class TestExperiment extends BasicExperiment{
     Arena vivaeArena = null;
     JFrame f = null;
     private boolean isVisible;
+    private boolean initialized = false;
 
 
     public TestExperiment() {
@@ -41,9 +43,11 @@ public class TestExperiment extends BasicExperiment{
 
     public void setupExperiment(double[][][] wm, String scenario, boolean visible) throws IOException {
          isVisible = visible;
+         initialized = true;
+
          if (visible) {
             f = new JFrame("FRNN Experiment");
-            vivaeArena = new Arena(f);
+            vivaeArena = Arena.renewArena(f);
 
             f.setBounds(50, 0, vivaeArena.screenWidth, vivaeArena.screenHeight + 30);
             f.setResizable(false);
@@ -54,16 +58,15 @@ public class TestExperiment extends BasicExperiment{
             vivaeArena.loadScenario(scenario);
             vivaeArena.isVisible = true;
             vivaeArena.setAllArenaPartsAntialiased(true);
-            vivaeArena.isVisible = true;
         } else {
-            vivaeArena = new Arena(f);
+            vivaeArena = Arena.renewArena(f);
             vivaeArena.loadScenario(scenario);
             vivaeArena.isVisible = false;
             vivaeArena.setLoopSleepTime(0);
         }
 
-        VivaeRobot va1 = new VivaeRobot(vivaeArena, "Vrobot1");
-        VivaeRobot va2 = new VivaeRobot(vivaeArena, "Vrobot2");
+        VivaeRobot va1 = new VivaeRobot("Vrobot1");
+        VivaeRobot va2 = new VivaeRobot("Vrobot2");
 
         int sensors_cnt = 4;
         double sangle = -Math.PI / 2;
@@ -88,26 +91,27 @@ public class TestExperiment extends BasicExperiment{
         va1.addSensor(new OdometerSensor(va1));
 //        va2.addSensor(new OdometerSensor(va2));
 
-//        HardwareRobot hr = new HardwareRobot("localhost", 6005);
+        HardwareRobot hr = new HardwareRobot("localhost", 6001);
 
-//        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
-//        KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
+        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
+        //KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
 //          KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
 //        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
-        DemoController dc = new DemoController(va1);
+         DemoController dc = new DemoController(hr);
 //        FileReaderController frc = new FileReaderController(va2, "reply_run.txt");
 
 
 //        FRNNController frnnc2 = new FRNNController(va2, wm[0]);
 //        KeyboardVivaeController kbc = new KeyboardVivaeController(va2);
 //        controllers.add(frnnc1);
+        controllers.add(kbc);
 //        controllers.add(dc);
-        controllers.add(dc);
-//        controllers.add(hr);
+//        controllers.add(dc);
 //        controllers.add(frnnc2);
 
 
 
+//        robots.add(hr);
         robots.add(va1);
 //        robots.add(va2);
 
@@ -123,11 +127,18 @@ public class TestExperiment extends BasicExperiment{
 //        robots.add(hr);
 
 //        hr.getSensorData();
+
+//        hr.connect();
+//        hr.setMaxWheelSpeed(10);
+
     }
 
     public void startExperiment() {
         System.out.println("Starting experiment, visible = " + isVisible);
 
+        if(!initialized) {
+            System.err.println("Experiment was not set-upped. ?!?");
+        }
 
         /**
          * Thread sleep time in milisecs.

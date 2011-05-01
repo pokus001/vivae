@@ -116,21 +116,21 @@ public class Main {
             e.printStackTrace();
         }
     }
-
-    public static void runHWUserUIDemo() {
-        IHardwareRobotInterface robot = null;
-        try {
-            robot = new HardwareRobot("localhost", 6005);
-            //when using joystick don;t forget to set VM option -Djava.library.path=lib
-            JoystickDriver joystickController = new JoystickDriver();
-            JFrame frame = new MainForm(robot, joystickController);
-//            JFrame frame = new MainForm(robot);
-            frame.setVisible(true);
-
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    }
+//
+//    public static void runHWUserUIDemo() {
+//        IHardwareRobotInterface robot = null;
+//        try {
+//            robot = new HardwareRobot("localhost", 6005);
+//            //when using joystick don;t forget to set VM option -Djava.library.path=lib
+//            JoystickDriver joystickController = new JoystickDriver();
+//            JFrame frame = new MainForm(robot, joystickController);
+////            JFrame frame = new MainForm(robot);
+//            frame.setVisible(true);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
+//    }
 
     public static void runJoystickHWDemo() {
         try {

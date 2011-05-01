@@ -37,8 +37,7 @@ public class AverageSpeed extends FitnessFunction {
                 for (ISensor rs: robotSensors) {
                     //TODO: also discriminator
                     if(rs instanceof OdometerSensor) {
-                        double[][] sensorData = new double[1][1];
-                        sensorData = ((OdometerSensor)rs).getSensoryData();
+                        double[][] sensorData = ((OdometerSensor)rs).getSensoryData();
                         res += sensorData[0][0];
                     }
                 }

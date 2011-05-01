@@ -41,13 +41,13 @@ public class VivaeRobot implements IRobotWithSensorsInterface {
     private double left;
     private double right;
 
-    public VivaeRobot(Arena arena, String name) {
+    public VivaeRobot(String name) {
         //no duplicator robot
-        this(arena, name, null);
+        this(name, null);
     }
 
-    public VivaeRobot(Arena arena, String name, IRobotInterface duplicateRobot ) {
-        this.arena = arena;
+    public VivaeRobot(String name, IRobotInterface duplicateRobot ) {
+        this.arena = Arena.getArena();
         this.name  = name;
         this.robotNumber = robotCount++;
         this.duplicateRobot = duplicateRobot;
@@ -109,14 +109,6 @@ public class VivaeRobot implements IRobotWithSensorsInterface {
             duplicateRobot.setWheelSpeed(left, right);
         }
 
-    }
-
-    public double getLeft() {
-        return left;
-    }
-
-    public double getRight() {
-        return right;
     }
 
     public Arena getArena() {
@@ -181,10 +173,6 @@ public class VivaeRobot implements IRobotWithSensorsInterface {
         }
         sensoryData = data;
         return data;
-    }
-
-    public double getOdometer(){
-        return robotRepresent.odometer;
     }
 
     public void addSensor(ISensor s) {
