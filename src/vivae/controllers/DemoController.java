@@ -3,6 +3,7 @@ package vivae.controllers;
 import robot.HardwareRobot;
 import vivae.controllers.IRobotController;
 import vivae.robots.IRobotInterface;
+import vivae.robots.IRobotWithSensorsInterface;
 import vivae.robots.VivaeRobot;
 
 import java.io.BufferedWriter;

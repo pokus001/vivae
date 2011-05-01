@@ -20,6 +20,7 @@ import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
 import vivae.sensors.AsyncScalableDistanceSensor;
 import vivae.sensors.OdometerSensor;
+import vivae.sensors.ScalableDistanceSensor;
 import vivae.util.KeyboardLayout;
 import vivae.util.Util;
 
@@ -74,7 +75,7 @@ public class TestExperiment extends BasicExperiment{
 //        double ai = Math.PI / (sensors_cnt / 2 - 1);
         double ai = (eangle - sangle) / (sensors_cnt -1);
 
-//        va1.addSensor(new ScalableDistanceSensor(va1 ,sangle, eangle, sensors_cnt, 50));
+        va1.addSensor(new ScalableDistanceSensor(va1 ,sangle, eangle, sensors_cnt, 50));
 //        va2.addSensor(new ScalableDistanceSensor(va2 ,sangle, eangle, sensors_cnt, 50));
 //
 
@@ -93,18 +94,19 @@ public class TestExperiment extends BasicExperiment{
 
         HardwareRobot hr = new HardwareRobot("localhost", 6001);
 
-        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
+//        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
         //KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
 //          KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
 //        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
-         DemoController dc = new DemoController(hr);
+//         DemoController dc = new DemoController(hr);
+        StopAtWallController stw = new StopAtWallController(va1);
 //        FileReaderController frc = new FileReaderController(va2, "reply_run.txt");
 
 
 //        FRNNController frnnc2 = new FRNNController(va2, wm[0]);
 //        KeyboardVivaeController kbc = new KeyboardVivaeController(va2);
 //        controllers.add(frnnc1);
-        controllers.add(kbc);
+        controllers.add(stw);
 //        controllers.add(dc);
 //        controllers.add(dc);
 //        controllers.add(frnnc2);

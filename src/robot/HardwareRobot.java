@@ -80,7 +80,7 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
     private long time = System.currentTimeMillis();
 
     //async sensory data catching related variables:
-    private static final int TIMER_VALUE_MS = 500;
+    private static final int TIMER_VALUE_MS = 1000;
     protected boolean isRunning = false;
     protected Timer updateTimer;
     protected double[][] cachedSensorData;
@@ -501,6 +501,7 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
                 updateTimer = new Timer();
                 updateTimer.schedule (new updateTime(this) , 0, TIMER_VALUE_MS);
                 sensorTimerRunning = true;
+                System.out.println("Sensor timer created at " + System.currentTimeMillis());
             }
             if(cachedSensorData == null) {
                 updateSensoryData();
@@ -511,12 +512,15 @@ public class HardwareRobot implements IHardwareRobotInterface, IRobotWithSensors
 
     public synchronized void updateSensoryData() {
 
+        System.out.println("Updating sensory data at " + System.currentTimeMillis());
+
         if(OFFLINE_TEST_MODE) {
            double[][] tst = new double[1][64];
             for(int i = 0; i < 64; i++) {
                 tst[0][i] = Math.random();
             }
             cachedSensorData = tst;
+            return;
         }
 
         int columnCnt = (int)(CROP_WIDTH * DISTANCE_SCALE);
