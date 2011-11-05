@@ -1,8 +1,8 @@
 package vivae.sensors;
 
-import vivae.robots.VivaeRobot;
 import vivae.arena.parts.VivaeRobotRepresent;
 import vivae.robots.IRobotWithSensorsInterface;
+import vivae.robots.VivaeRobot;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,7 +27,7 @@ public class OdometerSensor implements ISensor {
             //TODO: error - cannot assign VivaeSensor to non-VivaeRobot !!!
             e.printStackTrace();
         }
-     }
+    }
 
     public double[][] getSensoryData() {
         double res[][] = new double[1][1];
@@ -36,7 +36,7 @@ public class OdometerSensor implements ISensor {
     }
 
     public void moveComponent() {
-        // no need to do anything - no repreyzentant
+        // no need to do anything - no representative
         return;
     }
 

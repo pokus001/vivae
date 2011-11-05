@@ -8,20 +8,15 @@
  */
 package vivae.example;
 
-import robot.HardwareRobot;
-import robot.IHardwareRobotInterface;
-import vivae.controllers.*;
-import vivae.robots.FileWriterRobot;
-import vivae.robots.IRobotInterface;
-import vivae.robots.VivaeRobot;
-//import robot.VivaeRobotTmp;
 import vivae.arena.Arena;
+import vivae.controllers.FRNNController;
+import vivae.controllers.VivaeController;
 import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
-import vivae.sensors.AsyncScalableDistanceSensor;
+import vivae.robots.IRobotInterface;
+import vivae.robots.VivaeRobot;
 import vivae.sensors.OdometerSensor;
 import vivae.sensors.ScalableDistanceSensor;
-import vivae.util.KeyboardLayout;
 import vivae.util.Util;
 
 import javax.swing.*;
@@ -29,7 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-public class TestExperiment extends BasicExperiment{
+//import robot.VivaeRobotTmp;
+
+public class TestExperiment extends BasicExperiment {
 
     Arena vivaeArena = null;
     JFrame f = null;
@@ -42,11 +39,11 @@ public class TestExperiment extends BasicExperiment{
         controllers = new ArrayList<VivaeController>();
     }
 
-    public void setupExperiment(double[][][] wm, String scenario, boolean visible) throws IOException {
-         isVisible = visible;
-         initialized = true;
+    public void setupExperiment(int sensors, double[][][] wm, String scenario, boolean visible) throws IOException {
+        isVisible = visible;
+        initialized = true;
 
-         if (visible) {
+        if (visible) {
             f = new JFrame("FRNN Experiment");
             vivaeArena = Arena.renewArena(f);
 
@@ -69,17 +66,16 @@ public class TestExperiment extends BasicExperiment{
         VivaeRobot va1 = new VivaeRobot("Vrobot1");
         VivaeRobot va2 = new VivaeRobot("Vrobot2");
 
-        int sensors_cnt = 4;
         double sangle = -Math.PI / 2;
         double eangle = +Math.PI / 2;
 //        double ai = Math.PI / (sensors_cnt / 2 - 1);
-        double ai = (eangle - sangle) / (sensors_cnt -1);
+        double ai = (eangle - sangle) / (sensors - 1);
 
-        va1.addSensor(new ScalableDistanceSensor(va1 ,sangle, eangle, sensors_cnt, 50));
+        va1.addSensor(new ScalableDistanceSensor(va1, sangle, eangle, sensors, 50));
 //        va2.addSensor(new ScalableDistanceSensor(va2 ,sangle, eangle, sensors_cnt, 50));
 //
 
-        va1.addSensor(new AsyncScalableDistanceSensor(va1, sangle, eangle, sensors_cnt, 50));
+//        va1.addSensor(new AsyncScalableDistanceSensor(va1, sangle, eangle, sensors_cnt, 50));
 
 //        for (int i = 0; i < sensors_cnt; i++) {
 //            va1.addDistanceSensor(sangle + i * ai, 50);
@@ -92,25 +88,24 @@ public class TestExperiment extends BasicExperiment{
         va1.addSensor(new OdometerSensor(va1));
 //        va2.addSensor(new OdometerSensor(va2));
 
-        HardwareRobot hr = new HardwareRobot("localhost", 6001);
+//        HardwareRobot hr = new HardwareRobot("localhost", 6001);
 
 //        KeyboardVivaeController kbc = new KeyboardVivaeController(va1, KeyboardLayout.ArrowsLayout());
         //KeyboardVivaeController kbc2 = new KeyboardVivaeController(hr, KeyboardLayout.AwdsLayout());
 //          KeyboardVivaeController kbc2 = new KeyboardVivaeController(va2, KeyboardLayout.AwdsLayout());
-//        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
+        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
 //         DemoController dc = new DemoController(hr);
-        StopAtWallController stw = new StopAtWallController(va1);
+//        StopAtWallController stw = new StopAtWallController(va1);
 //        FileReaderController frc = new FileReaderController(va2, "reply_run.txt");
 
 
 //        FRNNController frnnc2 = new FRNNController(va2, wm[0]);
 //        KeyboardVivaeController kbc = new KeyboardVivaeController(va2);
-//        controllers.add(frnnc1);
-        controllers.add(stw);
+        controllers.add(frnnc1);
+//        controllers.add(stw);
 //        controllers.add(dc);
 //        controllers.add(dc);
 //        controllers.add(frnnc2);
-
 
 
 //        robots.add(hr);
@@ -122,8 +117,6 @@ public class TestExperiment extends BasicExperiment{
 
 //        hr.connect();
 //        hr.setMaxWheelSpeed(10);
-
-
 
 
 //        robots.add(hr);
@@ -138,8 +131,9 @@ public class TestExperiment extends BasicExperiment{
     public void startExperiment() {
         System.out.println("Starting experiment, visible = " + isVisible);
 
-        if(!initialized) {
-            System.err.println("Experiment was not set-upped. ?!?");
+        if (!initialized) {
+            System.err.println("Experiment not initialized!");
+            System.exit(1);
         }
 
         /**
@@ -182,19 +176,20 @@ public class TestExperiment extends BasicExperiment{
     public static void main(String[] args) {
 
         try {
-        TestExperiment exp = new TestExperiment();
+            TestExperiment exp = new TestExperiment();
 
-        String scen = "cfg/vivae/scenarios/arena1.svg";
-        int sensors=10; // 5 for distance and 5 for surface
-        int neurons=2;
-        int robots=2;
-        double[][][] wm = Util.randomArray3D(robots,neurons,2*sensors+neurons+1,-5,5);
+            String scen = "cfg/vivae/scenarios/arena1.svg";
+//            String scen = "cfg/vivae/scenarios/distance2_h.svg";
+            int sensors = 10; // 5 for distance and 5 for surface
+            int neurons = 2;
+            int robots = 2;
+            double[][][] wm = Util.randomArray3D(robots, neurons, 2 * sensors + neurons + 1, -5, 5);
 //        exp.setupExperiment(wm,50,25);
-        exp.setupExperiment(wm,scen, true);
+            exp.setupExperiment(sensors, wm, scen, true);
 //        FitnessFunction mot = new MovablesOnTop(exp.arena);//initialize fitness
-        FitnessFunction avg = new AverageSpeed(exp);
-        exp.startExperiment();
-        System.out.println("average speed fitness = "+ avg.getFitness());
+            FitnessFunction avg = new AverageSpeed(exp);
+            exp.startExperiment();
+            System.out.println("average speed fitness = " + avg.getFitness());
 //        System.out.println("average ontop fitness = "+ mot.getFitness());
         } catch (IOException ioe) {
             ioe.printStackTrace();

@@ -8,16 +8,13 @@
  */
 package vivae.example;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import vivae.fitness.AverageSpeed;
-import vivae.fitness.CombinedFitness;
-import vivae.fitness.Damage;
 import vivae.fitness.FitnessFunction;
 import vivae.util.Util;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GeneticSearch {
 
@@ -53,18 +50,16 @@ public class GeneticSearch {
         final GeneticSearch exp = new GeneticSearch(scenario, mutationRate, crossoverRate, generationCount, populationSize);
         final int sensors = 5;
         final int neurons = 2;
-        int robots=2;
+        int robots = 2;
 //        double[][][] wm = Util.randomArray3D(robots,neurons,2*sensors+neurons+1,-5,5);
 
 //        double[][][] wm = Util.randomArray3D(robots,neurons,2*sensors+neurons+1,-5,5);
-
-
 
 
         final double[][] wm = exp.runExperiment(neurons, sensors, 15, -15);
 
         long end = System.currentTimeMillis();
-        System.out.println("Computation takes " + (end - start)/1000 + " sec.");
+        System.out.println("Computation takes " + (end - start) / 1000 + " sec.");
 
         try {
             System.in.read();
@@ -73,16 +68,15 @@ public class GeneticSearch {
         }
 
 
-
-        exp.playExperiment(scenario, wm);
+        exp.playExperiment(scenario, sensors, wm);
 
     }
 
-    private FitnessFunction experiment(double[][] wm, boolean visible) {
+    private FitnessFunction experiment(int sensors, double[][] wm, boolean visible) {
         final TestExperiment exp = new TestExperiment();
         final double[][][] wm2 = new double[][][]{wm};
         try {
-            exp.setupExperiment(wm2, scenario, visible);
+            exp.setupExperiment(sensors, wm2, scenario, visible);
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -100,12 +94,12 @@ public class GeneticSearch {
         return avg;
     }
 
-    private void playExperiment(String scenario, double[][] wm) {
-        experiment(wm, true);
+    private void playExperiment(String scenario, int sensors, double[][] wm) {
+        experiment(sensors, wm, true);
     }
 
     private double[][] runExperiment(final int neurons, final int sensors,
-            final double max, final double min) {
+                                     final double max, final double min) {
 
         final List<WeightedNetwork> population = new ArrayList<WeightedNetwork>();
         randomPopulation(neurons, sensors, max, min, population);
@@ -124,7 +118,7 @@ public class GeneticSearch {
                 System.out.println("test " + i + "/" + index);
 
                 System.out.println(net.getGenotype());
-                final FitnessFunction fitness = experiment(net.getNet(), false);
+                final FitnessFunction fitness = experiment(sensors, net.getNet(), false);
                 net.setFitness(fitness.getFitness());
                 totalFitness += net.getFitness();
                 index++;
@@ -161,8 +155,8 @@ public class GeneticSearch {
     }
 
     private void randomPopulation(final int neurons, final int sensors,
-            final double max, final double min,
-            final List<WeightedNetwork> population) {
+                                  final double max, final double min,
+                                  final List<WeightedNetwork> population) {
 
         for (int i = 0; i < populationSize; i++) {
             population.add(new WeightedNetwork(0, Util.randomArray2D(neurons, 2
@@ -205,7 +199,7 @@ public class GeneticSearch {
     }
 
     private WeightedNetwork roulette(double totalFitness,
-            List<WeightedNetwork> nets) {
+                                     List<WeightedNetwork> nets) {
         double slice = Math.random() * totalFitness;
         double fitnessSoFar = 0;
 
@@ -240,7 +234,7 @@ public class GeneticSearch {
         private int parent;
 
         public WeightedNetwork(double fitness, double[][] net, int parent,
-                String genotype) {
+                               String genotype) {
             super();
             this.fitness = fitness;
             this.net = net;

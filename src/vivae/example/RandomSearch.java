@@ -4,6 +4,7 @@ import vivae.fitness.AverageSpeed;
 import vivae.fitness.FitnessFunction;
 import vivae.util.Util;
 
+import javax.swing.*;
 import java.io.IOException;
 
 /**
@@ -15,7 +16,7 @@ import java.io.IOException;
  */
 public class RandomSearch {
 
-    public double[][][] search(String scenario, int sensors, int neurons, int evals) throws IOException{
+    public double[][][] search(String scenario, int sensors, int neurons, int evals) throws IOException {
         TestExperiment exp = new TestExperiment();
         double bestfit = 0;
         double fit;
@@ -23,7 +24,7 @@ public class RandomSearch {
         for (int i = 0; i < evals; i++) {
             // the 3D matrix has toplevel size of 1, thus it is copied to all controllers
             double[][][] wm = Util.randomArray3D(1, neurons, 2 * sensors + neurons + 1, -15, 15);
-            exp.setupExperiment(wm, scenario, false);
+            exp.setupExperiment(sensors, wm, scenario, false);
 
 //            exp.setupExperiment(wm, 50, 25);
             FitnessFunction avg = new AverageSpeed(exp);
@@ -40,10 +41,10 @@ public class RandomSearch {
         return res;
     }
 
-    public void play(String scenario, double[][][] wm) throws IOException{
+    public void play(String scenario, int sensors, double[][][] wm) throws IOException {
         TestExperiment exp = new TestExperiment();
 
-        exp.setupExperiment(wm, scenario, true);
+        exp.setupExperiment(sensors, wm, scenario, true);
 
         FitnessFunction avg = new AverageSpeed(exp);
         exp.startExperiment();
@@ -51,14 +52,17 @@ public class RandomSearch {
     }
 
     public static void main(String[] arg) throws IOException {
-        String scenario = "cfg/vivae/scenarios/arena1.svg";
+//        String scenario = "cfg/vivae/scenarios/arena1.svg";
+        String scenario = "cfg/vivae/scenarios/distance3_h.svg";
+
         RandomSearch s = new RandomSearch();
         int neurons = 2;
         int sensors = 5;
-        int evaluations = 10;
+        int evaluations = 100;
 //        int evaluations = 3;
         double[][][] wmbest = s.search(scenario, sensors, neurons, evaluations);
 //        System.out.println(Util.toString2Darray(wmbest, ","));
-        s.play(scenario, wmbest); // play the best one
+        String someString = JOptionPane.showInputDialog("Show?");
+        s.play(scenario, sensors, wmbest); // play the best one
     }
 }
