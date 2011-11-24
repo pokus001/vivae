@@ -58,7 +58,7 @@ public class RandomSearch {
         RandomSearch s = new RandomSearch();
         int neurons = 2;
         int sensors = 5;
-        int evaluations = 100;
+        int evaluations = 5;
 //        int evaluations = 3;
         double[][][] wmbest = s.search(scenario, sensors, neurons, evaluations);
 //        System.out.println(Util.toString2Darray(wmbest, ","));
