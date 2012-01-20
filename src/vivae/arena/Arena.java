@@ -16,10 +16,12 @@ import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.svg.SVGDocument;
+import vivae.example.IExperiment;
+import vivae.robots.IRobotInterface;
 import vivae.arena.parts.*;
+import vivae.arena.parts.VivaeRobotRepresent;
 import vivae.controllers.KeyboardVivaeController;
 import vivae.controllers.VivaeController;
-import vivae.robots.IRobotInterface;
 import vivae.util.ArenaPartsGenerator;
 import vivae.util.FrictionBuffer;
 import vivae.util.SVGShapeLoader;
@@ -62,11 +64,11 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     /**
      * Screen width.
      */
-    public int screenWidth = 640;
+    public int screenWidth = 800;
     /**
      * Screen height.
      */
-    public int screenHeight = 480;
+    public int screenHeight = 600;
     /**
      * The physical world representing the arena (see Phys2D docs).
      */
@@ -163,6 +165,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     private String svgFileName = "";
 
 
+
     /**
      * Sets up a new screen size.
      *
@@ -179,11 +182,10 @@ public class Arena extends JPanel implements KeyListener, Runnable {
 
     /**
      * Singleton-like method, however creation should be handled by renewArena()
-     *
      * @return Arena created before.
      */
-    public static Arena getArena() {
-        if (Ainstance == null) {
+    public static Arena getArena(){
+        if(Ainstance == null) {
             throw new IllegalStateException("call to getArena() before arena was initialized!");
         }
         return Ainstance;
@@ -193,7 +195,6 @@ public class Arena extends JPanel implements KeyListener, Runnable {
      * This is a way how to create a new arena when a new experiment is being set-uped.
      * If normal singleton was used for Arena, different executions of experiment inside some high-level
      * application (algorithms etc.) caused that next execution used ending Arena from preivous one - incl. objects positions etc.
-     *
      * @param frame in which Arena should be placed. Null = no visualization.
      * @return newly created Arena
      */
@@ -203,6 +204,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     }
 
     /**
+     *
      * @return truth value saying if Arena is initialized
      */
     public static boolean isArenaUsed() {
@@ -251,7 +253,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
     }
 
     /**
-     * Initializes the World and adds all the actives and passives and physical boundaries inside.
+     * Initializates the World and adds all the actives and passives and physical boundaries inside.
      */
     public void initWorld() {
         encloseWithWalls(50);
@@ -296,7 +298,8 @@ public class Arena extends JPanel implements KeyListener, Runnable {
                         addSurface((Surface) vivae);
                     } else if (PositionMark.class.isAssignableFrom(vivae.getClass())) {
                         addPosition((PositionMark) vivae);
-                    } else if (Passive.class.isAssignableFrom(vivae.getClass())) {
+                    }
+                    else if (Passive.class.isAssignableFrom(vivae.getClass())) {
                         addPassive((Passive) vivae);
 //                    this should not happen anymore - actives (robots added by experiment, not SVG file !!!)
 // } else if (Active.class.isAssignableFrom(vivae.getClass())) {
@@ -308,7 +311,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
         }
     }
 
-    private void addPosition(PositionMark pos) {
+    public void addPosition(PositionMark pos) {
         positions.add(pos);
     }
 
@@ -525,7 +528,7 @@ public class Arena extends JPanel implements KeyListener, Runnable {
 
         for (Surface surface : surfaces) {
             srfc = surface;
-            Area actor2intersect = (Area) actArea.clone();
+            Area actor2intersect = (Area)actArea.clone();
             actor2intersect.intersect(srfc.getArea());
             if (!actor2intersect.isEmpty()) {
                 surfacesActorIsOn.add(srfc);

@@ -1,0 +1,417 @@
+/**
+ * This is VIVAE (Visual Vector Agent Environment)
+ * a library allowing for simulations of agents in co-evolution
+ * written as a bachelor project
+ * by Petr Smejkal
+ * at Czech Technical University in Prague
+ * in 2008
+ */
+package PredatorKorist;
+
+import vivae.fitness.*;
+import vivae.util.Util;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.prefs.Preferences;
+
+//import com.sun.org.apache.xml.internal.serializer.utils.Utils;
+//import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
+import PredatorKorist.*;
+
+public class GeneticSearchMoje {
+
+    private final String scenario;
+    private final double mutationRate;
+    private final double crossoverRate;
+    private final int generationCount;
+    private final int populationSize;
+
+    
+    public GeneticSearchMoje(
+            String scenario,
+            double mutationRate,
+            double crossoverRate,
+            int generationCount,
+            int populationSize) {
+        this.scenario = scenario;
+        this.mutationRate = mutationRate;
+        this.crossoverRate = crossoverRate;
+        this.generationCount = generationCount;
+        this.populationSize = populationSize;
+    }
+
+    private static WeightedNetworkMoje dummyBrained( int x, int y){
+    	double [][] mozecek = new double[x][];
+        for ( int xxx=  0; xxx < x; xxx++ ) {
+        	mozecek[ xxx ] =new double[y];	
+        	for ( int yyy=  0; yyy< y; yyy++ ) {
+        		mozecek[xxx][yyy]  =0;
+        	}
+        }
+        return new WeightedNetworkMoje(0, mozecek, 0, "aaa");
+    }
+    public static void main(String[] args) {
+        final String scenario = "cfg/vivae/scenarios/oval2_h22.svg";
+        //final String scenario = "cfg/vivae/scenarios/scenario2_resized.svg";
+    	
+        /*final double mutationRate = 0.01;
+        final double crossoverRate = 0.7;
+        final int generationCount = 6;
+        final int populationSize = 10;
+*/
+        final double mutationRate = 0.6;
+        final double crossoverRate = 0.7;
+        final int generationCount = 2;
+        final int populationSize = 20;
+        
+        long start = System.currentTimeMillis();
+
+        final GeneticSearchMoje exp = new GeneticSearchMoje(scenario, mutationRate, crossoverRate, generationCount, populationSize);
+        final int sensors = 5;
+        final int neurons = 2;
+
+    		
+            try {
+            	
+            	char a;
+            	BufferedReader br = new
+            	BufferedReader(new InputStreamReader(System.in));
+            	// read characters
+		System.out.println("l for load, Enter for learn ctrl^c to end");
+            	a = (char) br.read();
+            	
+              //  System.out.println("Precteno " + a );
+                if ( a == 'l' ){
+                	WeightedNetworkMoje net_korist = WeightedNetworkMoje.loadFile("nej_korist2.txt");
+                	WeightedNetworkMoje net_lovec = WeightedNetworkMoje.loadFile("nej_lovec2.txt");
+                	
+                    final List<WeightedNetworkMoje> population_korist = new ArrayList<WeightedNetworkMoje>();
+                    exp.randomPopulation(neurons, sensors, 10, -10, population_korist);
+                    
+                    //net_korist = population_korist.get(0);
+                    
+                    //net_korist = dummyBrained( net_korist.getNet().length, net_korist.getNet()[0].length  );
+                	Target t1 = new Target( (int)(Math.random() * 640) % 640, (int)(Math.random() * 480) % 480 );
+                	Target t2 = new Target( (int)(Math.random() * 640) % 640, (int)(Math.random() * 480) % 480 );
+                	exp.experiment(sensors, 
+                			net_lovec.getNet(), 
+                			true, t1, t2, 
+                			net_korist.getNet(), null);
+                	return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            final List<WeightedNetworkMoje> population_lovci = new ArrayList<WeightedNetworkMoje>();
+            exp.randomPopulation(neurons, sensors, 10, -10, population_lovci);
+            
+            final List<WeightedNetworkMoje> population_korist = new ArrayList<WeightedNetworkMoje>();
+            exp.randomPopulation(neurons, sensors, 10, -10, population_korist);
+
+            WeightedNetworkMoje nej_lovec = population_lovci.get(0); 
+            WeightedNetworkMoje nej_korist = population_korist.get(0);
+            nej_korist = dummyBrained( nej_lovec.getNet().length, nej_lovec.getNet()[0].length );
+
+            //nej_lovec = WeightedNetwork.loadFile("nej_lovec3.txt");
+            //nej_korist = WeightedNetwork.loadFile("nej_korist1.txt");          
+            for ( int i = 0; i < 10; i++ ){
+            	System.out.println( "Davka " + i );
+            	System.out.println( "Uci se lovci" );
+            	nej_lovec = exp.runExperiment(neurons, sensors, population_lovci, new FitnessFinder(null), nej_korist );
+            	
+            	
+            	System.out.println("Uci se korist");
+            	nej_korist = exp.runExperiment(neurons, sensors, population_korist, new FitnessKorist(null), nej_lovec );
+            	
+    		    
+		    		
+				WeightedNetworkMoje.saveFile( nej_lovec , "nej_lovec"+String.valueOf( i ) + ".txt");
+				WeightedNetworkMoje.saveFile( nej_korist , "nej_korist"+String.valueOf( i ) + ".txt");
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    			
+            }
+            
+
+        long end = System.currentTimeMillis();
+        System.out.println("Computation takes " + (end - start) / 1000 + " sec.");
+
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+       // exp.playExperiment(scenario, sensors, wm);
+
+    }
+
+    private FitnessFunctionMoje experiment(int sensors, double[][] wm, boolean visible, Target t1, Target t2, double [][] wmdruhy, FitnessFunctionMoje fitnessFunction ) {
+        final TestExperimentMoje exp = new TestExperimentMoje();
+        final double[][][] wm2 = new double[][][]{wm};
+        final double[][][] wmdruhy2 = new double[][][]{wmdruhy};
+        try {
+            exp.setupExperiment(sensors, wm2, scenario, visible, t1, t2, wmdruhy2);
+            
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        if ( fitnessFunction != null ) fitnessFunction.setExperiment( exp );
+       
+
+
+        exp.startExperiment();
+
+        return fitnessFunction;
+    }
+
+
+    private WeightedNetworkMoje runExperiment(final int neurons, final int sensors, List<WeightedNetworkMoje> population, FitnessFunctionMoje fitnessFunction, WeightedNetworkMoje enemy) {
+
+    	double min = -10;
+    	double max = 10;
+        
+//        randomPopulation(neurons, sensors, max, min, population);
+
+        WeightedNetworkMoje result = null;
+        double bestFitness = 0;
+        //for (int i = 0; i < generationCount; i++) {
+
+        
+        	
+        
+        for (int i = 0; i < generationCount; i++){
+            //System.out.println("new generation");
+            double totalFitness = 0;
+
+            result = null;
+            bestFitness = 0;
+
+            int index = 0;
+            for (WeightedNetworkMoje net : population) {
+                System.out.print("test " + i + "/" + index +" ");
+                
+                //System.out.println(net.getGenotype());
+                double fitness_result = 0;
+                for ( int iii = 0; iii< 5; iii++ ){
+                	
+                	Target t1 = new Target( (int)(Math.random() * 640) % 640, (int)(Math.random() * 480) % 480);
+                	Target t2 = new Target( (int)(Math.random() * 640) % 640, (int)(Math.random() * 480) % 480);
+                	
+                	final FitnessFunctionMoje fitness = experiment(sensors, net.getNet(), false, t1, t2, enemy.getNet(), fitnessFunction );
+                	fitness_result += fitness.getFitness();
+                }
+                System.out.println("Prumerna fitness: " + fitness_result);
+                net.setFitness(fitness_result);
+                totalFitness += fitness_result;
+                index++;
+
+                if (fitness_result > bestFitness) {
+                    bestFitness = fitness_result;
+                    result = net;
+                }
+            }
+
+            if ( totalFitness == 0 ) {
+            	randomPopulation(neurons, sensors, max, min, population);
+            	continue;
+            }
+            final List<WeightedNetworkMoje> temp = new ArrayList<WeightedNetworkMoje>();
+
+            temp.add(result);
+
+            for (int j = 0; j < populationSize / 2; j++) {
+                WeightedNetworkMoje offspring1 = roulette(totalFitness, population);
+                WeightedNetworkMoje offspring2 = roulette(totalFitness, population);
+
+                crossover(offspring1, offspring2);
+
+                mutate(offspring1, max, min);
+                mutate(offspring2, max, min);
+
+                temp.add(offspring1);
+                temp.add(offspring2);
+
+            }
+            population.clear();
+            population.addAll(temp);
+            
+
+        }
+	        
+
+        return result;
+    }
+
+    private void randomPopulation(final int neurons, final int sensors,
+                                  final double max, final double min,
+                                  final List<WeightedNetworkMoje> population) {
+
+        for (int i = 0; i < populationSize; i++) {
+            population.add(new WeightedNetworkMoje(0, Util.randomArray2D(neurons, 3
+                    * sensors + neurons + 1, min, max), 0, ""));
+        }
+
+    }
+
+    private void mutate(WeightedNetworkMoje net, double max, double min) {
+        for (int i = 0; i < net.getNet().length; i++) {
+            double[] item = net.getNet()[i];
+            for (int j = 0; j < item.length; j++) {
+                if (Math.random() < mutationRate) {
+                    item[j] = Math.random() * (max - min) + min;
+                }
+            }
+        }
+
+    }
+
+    private void crossover(WeightedNetworkMoje net1, WeightedNetworkMoje net2) {
+        if (Math.random() < crossoverRate) {
+            net1.addParent(net2.getParent());
+            net2.addParent(net1.getParent());
+            double[][] d1 = net1.getNet();
+            double[][] d2 = net2.getNet();
+
+            for (int i = 0; i < d1.length; i++) {
+
+                for (int j = 0; j < d1[i].length; j++) {
+                    double crossover = Math.random();
+                    double temp = d1[i][j];
+                    d1[i][j] = crossover * temp + (1 - crossover) * d2[i][j];
+                    d2[i][j] = crossover * d2[i][j] + (1 - crossover) * temp;
+
+                }
+            }
+        }
+
+    }
+
+    private WeightedNetworkMoje roulette(double totalFitness,
+                                     List<WeightedNetworkMoje> nets) {
+        double slice = Math.random() * totalFitness;
+        double fitnessSoFar = 0;
+
+        int i = 0;
+        for (WeightedNetworkMoje net : nets) {
+            fitnessSoFar += net.getFitness();
+
+            if (fitnessSoFar >= slice) {
+                return new WeightedNetworkMoje(0, copy(net.getNet()), i, net.getGenotype());
+            }
+            i++;
+        }
+
+        return null;
+    }
+
+    private static double[][] copy(double[][] source) {
+        final double[][] dest = new double[source.length][];
+
+        for (int j = 0; j < source.length; j++) {
+            dest[j] = source[j].clone();
+        }
+
+        return dest;
+    }
+
+    private static class WeightedNetworkMoje implements Comparable<WeightedNetworkMoje>, Serializable {
+
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 2568881575480760480L;
+		private double fitness;
+        private double[][] net;
+        private String genotype = "";
+        private int parent;
+
+        public WeightedNetworkMoje(double fitness, double[][] net, int parent,
+                               String genotype) {
+            super();
+            this.fitness = fitness;
+            this.net = net;
+            this.genotype += genotype + "," + parent;
+            this.parent = parent;
+        }
+
+        public double[][] getNet() {
+            return net;
+        }
+
+        public double getFitness() {
+            return fitness;
+        }
+
+        public void setFitness(double fitness) {
+            this.fitness = fitness;
+        }
+
+        public String getGenotype() {
+            return genotype;
+        }
+
+        public void addParent(int parent) {
+            genotype += "-" + parent;
+        }
+
+        public int getParent() {
+            return parent;
+        }
+
+        public int compareTo(WeightedNetworkMoje other) {
+            return Double.compare(other.fitness, fitness);
+        }
+        
+        public String print(){
+        	return net.toString();
+        }
+        public static WeightedNetworkMoje loadFile( String filename ){
+            try {
+                FileInputStream fis = new FileInputStream(filename);
+                ObjectInputStream in = new ObjectInputStream(fis);
+                WeightedNetworkMoje a = (WeightedNetworkMoje)in.readObject();
+                in.close();
+                return a;
+              }
+              catch (Exception e) {
+                  System.out.println(e);
+              }
+    		return null;
+        }
+
+        public static void saveFile( WeightedNetworkMoje a, String filename ){
+             try {
+                 FileOutputStream fos = new FileOutputStream(filename);
+                 ObjectOutputStream out = new ObjectOutputStream(fos);
+                 out.writeObject( a );
+                 out.flush();
+                 out.close();
+              }
+              catch (IOException e) {
+                  System.out.println(e); 
+              }
+        }
+    }
+
+    
+}

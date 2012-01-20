@@ -1,0 +1,201 @@
+/**
+ * This is VIVAE (Visual Vector Agent Environment)
+ * a library allowing for simulations of agents in co-evolution
+ * written as a bachelor project
+ * by Petr Smejkal
+ * at Czech Technical University in Prague
+ * in 2008
+ */
+package PredatorKorist;
+
+import vivae.arena.Arena;
+import vivae.arena.parts.PositionMark;
+import vivae.arena.parts.VivaeObject;
+import vivae.controllers.FRNNController;
+import vivae.controllers.VivaeController;
+import vivae.fitness.AverageSpeed;
+import vivae.fitness.FitnessFunction;
+import vivae.robots.IRobotInterface;
+import vivae.robots.VivaeRobot;
+import vivae.sensors.OdometerSensor;
+import vivae.sensors.ScalableDistanceSensor;
+import vivae.sensors.SurfaceFrictionSensor;
+import vivae.util.FrictionBuffer;
+import vivae.util.Util;
+
+import javax.swing.*;
+
+import PredatorKorist.DistanceSensorFinderISensor;
+import PredatorKorist.Target;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.ListIterator;
+
+
+//import robot.VivaeRobotTmp;
+
+public class TestExperimentMoje extends BasicExperiment {
+
+    Arena vivaeArena = null;
+    JFrame f = null;
+    private boolean isVisible;
+    private boolean initialized = false;
+    DistanceSensorFinderISensor distSenzor;
+    Target t1, t2;
+    VivaeRobotMoje va1, va2;
+
+    public TestExperimentMoje() {
+        robots = new ArrayList<IRobotInterface>();
+        controllers = new ArrayList<VivaeController>();
+    }
+
+    public void setupExperiment(int sensors, double[][][] wm, String scenario, boolean visible, Target tt1, Target tt2, double[][][] wm2) throws IOException {
+        isVisible = visible;
+        initialized = true;
+
+        if (visible) {
+            f = new JFrame("FRNN Experiment");
+            vivaeArena = Arena.renewArena(f);
+
+            f.setBounds(50, 0, vivaeArena.screenWidth, vivaeArena.screenHeight + 30);
+            f.setResizable(false);
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            
+            f.getContentPane().add(vivaeArena);
+            f.setVisible(true);
+
+            vivaeArena.loadScenario(scenario);
+            vivaeArena.isVisible = true;
+            vivaeArena.setAllArenaPartsAntialiased(true);
+            
+
+        } else {
+            vivaeArena = Arena.renewArena(f);
+            vivaeArena.loadScenario(scenario);
+            vivaeArena.isVisible = false;
+            vivaeArena.setLoopSleepTime(0);
+        }
+        t1 = tt1;
+        t2 = tt2;
+        java.awt.Shape rect = new java.awt.Rectangle( (int)t1.getX(),(int)t1.getY(), 3, 3);
+        PositionMark ps = new PositionMark(rect, 2, vivaeArena );
+        vivaeArena.addPosition(ps);
+
+        
+        java.awt.Shape rect2 = new java.awt.Rectangle( (int)t2.getX(),(int)t2.getY(), 3, 3);
+        PositionMark ps2 = new PositionMark(rect2, 2, vivaeArena );
+        
+        vivaeArena.addPosition(ps2);
+        
+        va1 = new VivaeRobotMoje("Vrobot1");
+        
+        double sangle = -Math.PI / 2;
+        double eangle = +Math.PI / 2;
+        
+
+        va1.addSensor(new ScalableDistanceSensor(va1, sangle, eangle, sensors, 50));
+        va1.addSensor(new OdometerSensor(va1));
+        distSenzor = new DistanceSensorFinderISensor(va1, t1);
+        va1.addSensor( distSenzor );
+
+        va1.addSensor( new SurfaceFrictionSensor(va1, 0, 20) );
+        va1.addSensor( new SurfaceFrictionSensor(va1, sangle/2, 20) );
+        va1.addSensor( new SurfaceFrictionSensor(va1, eangle/2, 20) );
+        va1.addSensor( new SurfaceFrictionSensor(va1, sangle, 20) );
+        va1.addSensor( new SurfaceFrictionSensor(va1, eangle, 20) );
+        //va1.addSensor(new DirectionBalanceSensor(va1));
+        FRNNController frnnc1 = new FRNNController(va1, wm[0]);
+        controllers.add(frnnc1);
+
+        robots.add(va1);
+        
+        
+        va2 = new VivaeRobotMoje("Vrobot2");
+
+        
+        t2 = tt2;
+        va2.addSensor(new ScalableDistanceSensor(va2, sangle, eangle, sensors, 50));
+        va2.addSensor(new OdometerSensor(va2));
+        distSenzor = new DistanceSensorFinderISensor(va2, t2);
+        va2.addSensor( distSenzor );
+
+        va2.addSensor( new SurfaceFrictionSensor(va2, 0, 20) );
+        va2.addSensor( new SurfaceFrictionSensor(va2, sangle/2, 20) );
+        va2.addSensor( new SurfaceFrictionSensor(va2, eangle/2, 20) );
+        va2.addSensor( new SurfaceFrictionSensor(va2, eangle, 20) );
+        va2.addSensor( new SurfaceFrictionSensor(va2, sangle, 20) );
+        
+        //va1.addSensor(new DirectionBalanceSensor(va1));
+        FRNNController frnnc2 = new FRNNController(va2, wm2[0]);
+        controllers.add(frnnc2);
+
+        robots.add(va2);
+    }
+
+    public void startExperiment() {
+        //System.out.println("Starting experiment, visible = " + isVisible);
+
+        if (!initialized) {
+            System.err.println("Experiment not initialized!");
+            System.exit(1);
+        }
+        
+        
+        //java.awt.Shape rect = new java.awt.Rectangle( (int)t1.getX(),(int)t1.getY(), 10, 10);
+        //PositionMark ps = new PositionMark(rect, 2, vivaeArena );
+        //vivaeArena.addPassive(ps);
+        /**
+         * Thread sleep time in milisecs.
+         */
+        int loopSleepTime = 10;
+        /**
+         * Number of steps the physical world takes in one iteration of the main loop.
+         */
+        int worldStepsPerLoop = 1;
+
+        
+        vivaeArena.setScreenSize(800, 600);
+        vivaeArena.initWorld();
+
+        //FitnessFinder ff = new FitnessFinder(this);
+        
+        
+        
+        
+        for (int i = 1; i < 3000; i++) {
+
+        	t1.setX( va2.getRobotRepresent().getX() );
+        	t1.setY( va2.getRobotRepresent().getY() );
+        	t2.setX( va1.getRobotRepresent().getX() );
+        	t2.setY( va1.getRobotRepresent().getY() );
+        	
+        	
+            ListIterator<VivaeController> ci = controllers.listIterator();
+            while (ci.hasNext()) {
+                ci.next().moveControlledObject();
+            }
+
+            vivaeArena.getWorld().step();
+            vivaeArena.moveVivaes();
+
+            //if ( ff.getFitness() > 0.96 ) break;
+            //System.out.println("Hodnota " + ((VivaeRobot)this.robots.get(0)).getSensorData()[2][0]);
+            if ( ((VivaeRobot)this.robots.get(0)).getSensorData()[0][1] > 0.97 ) break;
+            //System.out.println( ((VivaeRobot)this.robots.get(0)).getSensorData()[0][1] );
+            if (isVisible) {
+                vivaeArena.repaint();
+                if (loopSleepTime > 0) {
+                    try {
+                        Thread.sleep(loopSleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            stepsDone++;
+        }
+    }
+
+}
+

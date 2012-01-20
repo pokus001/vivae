@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="640"
+   height="480"
+   id="svg2384"
+   sodipodi:version="0.32"
+   inkscape:version="0.48.0 r9654"
+   version="1.0"
+   sodipodi:docname="oval2_h.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs2386">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective2392" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.8671875"
+     inkscape:cx="186.37295"
+     inkscape:cy="236.36011"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1680"
+     inkscape:window-height="976"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-maximized="1"
+     inkscape:snap-global="true"
+     inkscape:snap-bbox="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2395"
+       visible="true"
+       enabled="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2389">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       id="rect2387"
+       width="640"
+       height="480"
+       x="0"
+       y="0"
+       inkscape:label="Grass" />
+    <rect
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:0.7001583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect3200"
+       width="640.29987"
+       height="9.7998419"
+       x="-0.14992085"
+       y="-0.14992085"
+       inkscape:label="FixedObstacle" />
+    <rect
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:0.7001583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect3202"
+       width="640.29987"
+       height="9.7998419"
+       x="-0.14992085"
+       y="470.35007"
+       inkscape:label="FixedObstacle" />
+    <rect
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:1.02139139px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect3204"
+       width="9.98979"
+       height="459.4949"
+       x="630.00513"
+       y="10.505105"
+       inkscape:label="FixedObstacle" />
+    <rect
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:1.02030277px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect3206"
+       width="9.9796972"
+       height="458.97968"
+       x="0.010151404"
+       y="10.510151"
+       inkscape:label="FixedObstacle" />
+    <path
+       style="fill:#000000;fill-opacity:1"
+       d="M 170 40 C 97.98 40 40 97.98 40 170 L 40 310 C 40 382.02 97.98 440 170 440 L 470 440 C 542.02 440 600 382.02 600 310 L 600 170 C 600 97.98 542.02 40 470 40 L 170 40 z M 178 70 L 462 70 C 521.832 70 570 118.168 570 178 L 570 302 C 570 361.832 521.832 410 462 410 L 178 410 C 118.168 410 70 361.832 70 302 L 70 178 C 70 118.168 118.168 70 178 70 z "
+       id="rect3796"
+       inkscape:label="Road" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       id="rect2391"
+       width="20"
+       height="20"
+       x="570"
+       y="250"
+       inkscape:label="hyper.experiments.robots.friction.NetControlledRobotFriction" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       id="rect2391-1"
+       width="20"
+       height="20"
+       x="40"
+       y="240"
+       inkscape:label="hyper.experiments.robots.friction.NetControlledRobotFriction" />
+  </g>
+</svg>

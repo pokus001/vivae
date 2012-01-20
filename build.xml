@@ -42,7 +42,7 @@
     </target>
 
     <target name="run">
-        <java classname="vivae.example.TestExperiment" fork="true" failonerror="true" dir="${BUILD_DIR}">
+	<java classname="PredatorKorist.GeneticSearchMoje" fork="true" failonerror="true" dir="${BUILD_DIR}">
             <classpath>
                 <fileset dir="${LIB_DIR}">
                     <include name="**/*.jar"/>
