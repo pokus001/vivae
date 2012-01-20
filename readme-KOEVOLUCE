@@ -1,0 +1,20 @@
+ant je uz nakonfigurivany
+ant run
+enter (nebo ctrl-D, enter, podle konzole)
+nechat provest tak 10 davek
+
+Klidne to muzete pomoci ctrl-c stopnout driv
+
+Ve slozce build se ukladaji soubory s ulozenyma sitema
+Tak si vyberete tu nejlepsi a v GeneticSearchMoje.java ji nastavite k nacteni
+
+
+Potom
+
+ant run
+l (ctrl-d) enter
+a tim se spusti graficka simulace 
+
+
+
+Vicemene jsem vsechny nove nebo zmenene veci dal do package PredatorKorist, ale Arena nesla podedit, protoze pouziva staticke prvky, takze tu jsem ohnul na miste.
